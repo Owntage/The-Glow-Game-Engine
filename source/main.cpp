@@ -4,9 +4,29 @@
 #include <SFML/Audio.hpp>
 #include <SFML/Network.hpp>
 
+#include <Box2D/Box2D.h>
+
+
+void testBox2d()
+{
+	b2Vec2 gravity(0.0f, -10.0f);
+
+	// Construct a world object, which will hold and simulate the rigid bodies.
+	b2World world(gravity);
+
+	// Define the ground body.
+	b2BodyDef groundBodyDef;
+	groundBodyDef.position.Set(0.0f, -10.0f);
+
+	// Call the body factory which allocates memory for the ground body
+	// from a pool and creates the ground box shape (also from a pool).
+	// The body is also added to the world.
+	b2Body* groundBody = world.CreateBody(&groundBodyDef);
+}
 
 int main(int argc, char *argv[])
 {
+	testBox2d();
     sf::VideoMode screen(sf::VideoMode::getDesktopMode());
 
     sf::RenderWindow window(screen, "");
