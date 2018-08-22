@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 project(android-sfml-game)
 
-file(GLOB SOURCE_FILES ${PROJECT_SOURCE_DIR}/../source/*.cpp)
+file(GLOB SOURCE_FILES ${PROJECT_SOURCE_DIR}/../source/*.cpp ${PROJECT_SOURCE_DIR}/../source/*.h)
 
 add_executable(game ${SOURCE_FILES})
 
@@ -17,6 +17,7 @@ if(SFML_FOUND)
 	include_directories(${PROJECT_SOURCE_DIR}/include)
 		
 	target_link_libraries(game ${SFML_LIBRARIES})
+	target_link_libraries(game ${PROJECT_SOURCE_DIR}/../lib/libBox2D.a)
 endif()
 
 

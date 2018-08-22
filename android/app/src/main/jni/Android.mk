@@ -24,6 +24,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE    := sfml-example
 
 LOCAL_SRC_FILES := $(wildcard $(LOCAL_PATH)/../../../../../source/*.cpp)
+LOCAL_SRC_FILES += $(wildcard $(LOCAL_PATH)/../../../../../source/*.h)
 
 LOCAL_SHARED_LIBRARIES := sfml-system-d
 LOCAL_SHARED_LIBRARIES += sfml-window-d
