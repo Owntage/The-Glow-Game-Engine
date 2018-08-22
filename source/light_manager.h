@@ -1,17 +1,26 @@
 #ifndef LIGHT_MANAGER_H
 #define LIGHT_MANAGER_H
 
-#include <SFML/System.hpp>
-#include <SFML/Graphics.hpp>
-#include <SFML/Window.hpp>
+#include<SFML/Graphics.hpp>
 
-#define LIGHT_VERTEX_SHADER "res/light_vertex_shader.txt"
-#define LIGHT_FRAGMENT_SHADER "res/light_fragment_shader.txt"
-#define MULTIPLY_FRAGMENT_SHADER "res/divide_fragment_shader.txt"
 
-struct LightManager
+struct ILightManager
 {
-	LightManager(float screenWidth, float screenHeight, float tileWidth);
+	virtual ~ILightManager() {}
+	virtual int addLightSource(sf::Vector2f pos, sf::Color color, float intensity) = 0;
+	virtual int addRectangleObstacle(sf::Vector2f pos, sf::Vector2f size) = 0;
+	virtual void draw(sf::RenderTarget& renderTarget) = 0;
+	virtual void setPosition(int lightSourceIndex, sf::Vector2f pos) = 0;
+	virtual void removeLightSource(int lightSourceIndex) = 0;
+	virtual void onWindowResize(float screenWidth, float screenHeight) = 0;
+};
+
+struct ShadowLightManagerImpl;
+
+struct ShadowLightManager : ILightManager
+{
+	ShadowLightManager(float screenWidth, float screenHeight, float tileSize);
+	~ShadowLightManager();
 	int addLightSource(sf::Vector2f pos, sf::Color color, float intensity);
 	int addRectangleObstacle(sf::Vector2f pos, sf::Vector2f size);
 	void draw(sf::RenderTarget& renderTarget);
@@ -19,32 +28,7 @@ struct LightManager
 	void removeLightSource(int lightSourceIndex);
 	void onWindowResize(float screenWidth, float screenHeight);
 private:
-	struct LightData
-	{
-		sf::Vector2f position;
-		sf::Vector3f color;
-		float intensity;
-		LightData() {}
-		LightData(sf::Vector2f position, sf::Vector3f color, float intensity) :
-				position(position),
-				color(color),
-				intensity(intensity)
-		{}
-	};
-	std::map<int, int> idToShaderIndex; //can be replaced with bimap
-	std::map<int, int> shaderIndexToId;
-	std::map<int, LightData> idToData;
-	int shaderArraySize;
-	int shadowsArraySize;
-	int counter;
-	int textureDivider;
-	sf::Shader shader;
-	sf::Shader multiplyShader;
-	sf::RectangleShape shape;
-	sf::RenderTexture renderTexture;
-	float screenWidth;
-	float screenHeight;
-	float tileWidth;
+	ShadowLightManagerImpl* impl;
 };
 
 #endif

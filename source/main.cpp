@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 	window.setView(view);
 	sf::Color background = sf::Color::Black;
 
-	LightManager lightManager(screen.width, screen.height, 32);
+	ShadowLightManager lightManager(screen.width, screen.height, 32);
 	lightManager.addLightSource(sf::Vector2f(-100, 0), sf::Color::Magenta, 0.5);
 	lightManager.addRectangleObstacle(sf::Vector2f(0, 0), sf::Vector2f(32, 32));
 

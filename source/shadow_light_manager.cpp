@@ -1,7 +1,53 @@
 #include "light_manager.h"
 
+#include <SFML/System.hpp>
+#include <SFML/Graphics.hpp>
+#include <SFML/Window.hpp>
 
-LightManager::LightManager(float screenWidth, float screenHeight, float tileWidth) :
+#define LIGHT_VERTEX_SHADER "res/light_vertex_shader.txt"
+#define LIGHT_FRAGMENT_SHADER "res/light_fragment_shader.txt"
+#define MULTIPLY_FRAGMENT_SHADER "res/divide_fragment_shader.txt"
+
+
+struct ShadowLightManagerImpl
+{
+	ShadowLightManagerImpl(float screenWidth, float screenHeight, float tileWidth);
+	int addLightSource(sf::Vector2f pos, sf::Color color, float intensity);
+	int addRectangleObstacle(sf::Vector2f pos, sf::Vector2f size);
+	void draw(sf::RenderTarget& renderTarget);
+	void setPosition(int lightSourceIndex, sf::Vector2f pos);
+	void removeLightSource(int lightSourceIndex);
+	void onWindowResize(float screenWidth, float screenHeight);
+private:
+	struct LightData
+	{
+		sf::Vector2f position;
+		sf::Vector3f color;
+		float intensity;
+		LightData() {}
+		LightData(sf::Vector2f position, sf::Vector3f color, float intensity) :
+				position(position),
+				color(color),
+				intensity(intensity)
+		{}
+	};
+	std::map<int, int> idToShaderIndex; //can be replaced with bimap
+	std::map<int, int> shaderIndexToId;
+	std::map<int, LightData> idToData;
+	int shaderArraySize;
+	int shadowsArraySize;
+	int counter;
+	int textureDivider;
+	sf::Shader shader;
+	sf::Shader multiplyShader;
+	sf::RectangleShape shape;
+	sf::RenderTexture renderTexture;
+	float screenWidth;
+	float screenHeight;
+	float tileWidth;
+};
+
+ShadowLightManagerImpl::ShadowLightManagerImpl(float screenWidth, float screenHeight, float tileWidth) :
 		screenWidth(screenWidth),
 		screenHeight(screenHeight),
 		tileWidth(tileWidth),
@@ -28,7 +74,7 @@ LightManager::LightManager(float screenWidth, float screenHeight, float tileWidt
 	shape.setOrigin(screenWidth / tileWidth / 2, screenHeight / tileWidth / 2);
 }
 
-int LightManager::addLightSource(sf::Vector2f pos, sf::Color color, float intensity)
+int ShadowLightManagerImpl::addLightSource(sf::Vector2f pos, sf::Color color, float intensity)
 {
 	idToShaderIndex[counter] = shaderArraySize;
 	shaderIndexToId[shaderArraySize] = counter;
@@ -45,7 +91,7 @@ int LightManager::addLightSource(sf::Vector2f pos, sf::Color color, float intens
 	return counter++;
 }
 
-int LightManager::addRectangleObstacle(sf::Vector2f pos, sf::Vector2f size)
+int ShadowLightManagerImpl::addRectangleObstacle(sf::Vector2f pos, sf::Vector2f size)
 {
 	shader.setUniform("shadow_pos[" + std::to_string(shadowsArraySize) + "]", pos);
 	shader.setUniform("shadow_size[" + std::to_string(shadowsArraySize) + "]", size);
@@ -54,7 +100,7 @@ int LightManager::addRectangleObstacle(sf::Vector2f pos, sf::Vector2f size)
 	return counter++;
 }
 
-void LightManager::draw(sf::RenderTarget& renderTarget)
+void ShadowLightManagerImpl::draw(sf::RenderTarget& renderTarget)
 {
 	sf::RenderStates renderStates;
 	renderStates.shader = &shader;
@@ -109,12 +155,12 @@ void LightManager::draw(sf::RenderTarget& renderTarget)
 	renderTarget.draw(shape, multiplyRenderStates);
 }
 
-void LightManager::setPosition(int lightSourceID, sf::Vector2f pos)
+void ShadowLightManagerImpl::setPosition(int lightSourceID, sf::Vector2f pos)
 {
 	shader.setUniform("light_pos[" + std::to_string(idToShaderIndex[lightSourceID]) + "]", pos);
 }
 
-void LightManager::removeLightSource(int lightSourceID)
+void ShadowLightManagerImpl::removeLightSource(int lightSourceID)
 {
 	//should swap with the last element in shader array
 	int lastId = shaderIndexToId[shaderArraySize - 1];
@@ -132,10 +178,50 @@ void LightManager::removeLightSource(int lightSourceID)
 
 }
 
-void LightManager::onWindowResize(float screenWidth, float screenHeight)
+void ShadowLightManagerImpl::onWindowResize(float screenWidth, float screenHeight)
 {
 	this->screenWidth = screenWidth;
 	this->screenHeight = screenHeight;
 	shape.setSize(sf::Vector2f(screenWidth / tileWidth, screenHeight / tileWidth));
 	shape.setOrigin(screenWidth / tileWidth / 2, screenHeight / tileWidth / 2);
+}
+
+ShadowLightManager::ShadowLightManager(float screenWidth, float screenHeight, float tileWidth)
+{
+	impl = new ShadowLightManagerImpl(screenWidth, screenHeight, tileWidth);
+}
+
+ShadowLightManager::~ShadowLightManager()
+{
+	delete impl;
+}
+
+int ShadowLightManager::addLightSource(sf::Vector2f pos, sf::Color color, float intensity)
+{
+	return impl->addLightSource(pos, color, intensity);
+}
+
+int ShadowLightManager::addRectangleObstacle(sf::Vector2f pos, sf::Vector2f size)
+{
+	return impl->addRectangleObstacle(pos, size);
+}
+
+void ShadowLightManager::draw(sf::RenderTarget& renderTarget)
+{
+	impl->draw(renderTarget);
+}
+
+void ShadowLightManager::setPosition(int lightSourceIndex, sf::Vector2f pos)
+{
+	impl->setPosition(lightSourceIndex, pos);
+}
+
+void ShadowLightManager::removeLightSource(int lightSourceIndex)
+{
+	impl->removeLightSource(lightSourceIndex);
+}
+
+void ShadowLightManager::onWindowResize(float screenWidth, float screenHeight)
+{
+	impl->onWindowResize(screenWidth, screenHeight);
 }
