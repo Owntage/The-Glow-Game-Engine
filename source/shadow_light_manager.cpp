@@ -1,8 +1,5 @@
 #include "light_manager.h"
 
-#include <SFML/System.hpp>
-#include <SFML/Graphics.hpp>
-#include <SFML/Window.hpp>
 
 #define LIGHT_VERTEX_SHADER "res/light_vertex_shader.txt"
 #define LIGHT_FRAGMENT_SHADER "res/light_fragment_shader.txt"

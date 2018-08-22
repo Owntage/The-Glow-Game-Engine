@@ -15,6 +15,22 @@ struct ILightManager
 	virtual void onWindowResize(float screenWidth, float screenHeight) = 0;
 };
 
+struct SimpleLightManagerImpl;
+
+struct SimpleLightManager : ILightManager
+{
+	SimpleLightManager(float screenWidth, float screenHeight, float tileSize);
+	~SimpleLightManager();
+	int addLightSource(sf::Vector2f pos, sf::Color color, float intensity);
+	int addRectangleObstacle(sf::Vector2f pos, sf::Vector2f size);
+	void draw(sf::RenderTarget& renderTarget);
+	void setPosition(int lightSourceIndex, sf::Vector2f pos);
+	void removeLightSource(int lightSourceIndex);
+	void onWindowResize(float screenWidth, float screenHeight);
+private:
+	SimpleLightManagerImpl* impl;
+};
+
 struct ShadowLightManagerImpl;
 
 struct ShadowLightManager : ILightManager

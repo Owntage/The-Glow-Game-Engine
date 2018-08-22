@@ -20,6 +20,7 @@ void testBox2d()
 int main(int argc, char *argv[])
 {
 	testBox2d();
+	SimpleLightManager simpleLightManager(0, 0, 0);
 
 	sf::VideoMode screen(sf::VideoMode::getDesktopMode());
 	sf::RenderWindow window(screen, "");
