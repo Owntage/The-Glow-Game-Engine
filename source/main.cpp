@@ -20,18 +20,23 @@ void testBox2d()
 int main(int argc, char *argv[])
 {
 	testBox2d();
-	SimpleLightManager simpleLightManager(0, 0, 0);
 
 	sf::VideoMode screen(sf::VideoMode::getDesktopMode());
 	sf::RenderWindow window(screen, "");
 	window.setFramerateLimit(30);
 	sf::View view(sf::Vector2f(0, 0), sf::Vector2f(screen.width / 32, screen.height / 32));
 	window.setView(view);
-	sf::Color background = sf::Color::Black;
+	sf::Color background = sf::Color::White;
 
 	ShadowLightManager lightManager(screen.width, screen.height, 32);
-	lightManager.addLightSource(sf::Vector2f(-100, 0), sf::Color::Magenta, 0.5);
-	lightManager.addRectangleObstacle(sf::Vector2f(0, 0), sf::Vector2f(32, 32));
+	SimpleLightManager simpleLightManager(screen.width, screen.height, 32);
+	for (int i = 0; i < 100; i++)
+	{
+		simpleLightManager.addLightSource(sf::Vector2f(rand() % 1000 - 500, rand() % 1000 - 500), sf::Color(rand() % 64, rand() % 64, rand() % 64), rand() % 20 + 5);
+	}
+	simpleLightManager.addLightSource(sf::Vector2f(0, 0), sf::Color::Magenta, 10);
+	simpleLightManager.addLightSource(sf::Vector2f(-100, 0), sf::Color::Magenta, 10);
+	//lightManager.addRectangleObstacle(sf::Vector2f(0, 0), sf::Vector2f(32, 32));
 
 	sf::RectangleShape rect(sf::Vector2f(1, 1));
 	rect.setOrigin(0.5, 0.5);
@@ -68,7 +73,7 @@ int main(int argc, char *argv[])
 
 		window.clear(background);
 		window.draw(rect);
-		lightManager.draw(window);
+		simpleLightManager.draw(window);
 		window.display();
 
 	}

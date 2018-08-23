@@ -1,5 +1,26 @@
 #include "light_manager.h"
+
 #include "math.h"
+#include <unordered_map>
+
+using namespace std;
+
+struct LightData
+{
+	float radius; //in blocks
+	sf::Color color;
+	sf::Vector2f pos;
+	float additivePart; // [0..1]
+
+	LightData() {}
+
+	LightData(float radius, sf::Color color, sf::Vector2f pos, float additivePart) :
+			radius(radius),
+			color(color),
+			additivePart(additivePart),
+			pos(pos)
+	{}
+};
 
 struct SimpleLightManagerImpl
 {
@@ -13,9 +34,14 @@ struct SimpleLightManagerImpl
 private:
 	const unsigned int BUBBLE_TEXTURE_SIZE = 100;
 	sf::Texture bubbleTexture;
+	unordered_map<int, LightData> lights;
+	int lightCounter;
+	float tileSize;
 };
 
-SimpleLightManagerImpl::SimpleLightManagerImpl(float screenWidth, float screenHeight, float tileSize)
+SimpleLightManagerImpl::SimpleLightManagerImpl(float screenWidth, float screenHeight, float tileSize) :
+	lightCounter(0),
+	tileSize(tileSize)
 {
 	sf::Image bubbleImage;
 	bubbleImage.create(BUBBLE_TEXTURE_SIZE, BUBBLE_TEXTURE_SIZE, sf::Color::Black);
@@ -39,24 +65,51 @@ SimpleLightManagerImpl::SimpleLightManagerImpl(float screenWidth, float screenHe
 		}
 	}
 	bubbleImage.saveToFile("bubble.png");
-	//todo: write bubble to texture
+	bubbleTexture.loadFromImage(bubbleImage);
+	bubbleTexture.setSmooth(true);
+	bubbleTexture.generateMipmap();
 }
 
 int SimpleLightManagerImpl::addLightSource(sf::Vector2f pos, sf::Color color, float intensity)
 {
-	//todo: implement
-	return 0;
+	LightData lightData(intensity, color, pos, 0.5f);
+	lights[lightCounter] = lightData; //todo: make additive part configurable
+	return lightCounter++;
 }
 
 int SimpleLightManagerImpl::addRectangleObstacle(sf::Vector2f pos, sf::Vector2f size)
 {
-	//todo: implement
+	//obstacles can't be implemented without shaders
 	return 0;
 }
 
 void SimpleLightManagerImpl::draw(sf::RenderTarget& renderTarget)
 {
-	//todo: implement
+	sf::RectangleShape rect;
+	rect.setTexture(&bubbleTexture);
+	sf::RenderTexture renderTexture;
+	renderTexture.create(renderTarget.getSize().x, renderTarget.getSize().y);
+	renderTexture.setView(renderTarget.getView());
+	sf::RenderStates renderStates;
+	renderStates.blendMode = sf::BlendAdd;
+
+	for (auto iter = lights.begin(); iter != lights.end(); iter++)
+	{
+		LightData data = iter->second;
+		rect.setSize(sf::Vector2f(data.radius, data.radius));
+		rect.setOrigin(data.radius / 2, data.radius / 2);
+		rect.setPosition(data.pos / tileSize);
+		rect.setFillColor(data.color);
+		renderTexture.draw(rect, renderStates);
+	}
+	renderTexture.display();
+	sf::RectangleShape resultRect;
+	resultRect.setTexture(&renderTexture.getTexture());
+	resultRect.setOrigin(renderTarget.getView().getSize() / 2.0f);
+	resultRect.setSize(renderTarget.getView().getSize());
+	resultRect.setPosition(renderTarget.getView().getCenter());
+	renderStates.blendMode = sf::BlendMultiply;
+	renderTarget.draw(resultRect, renderStates);
 }
 
 void SimpleLightManagerImpl::setPosition(int lightSourceIndex, sf::Vector2f pos)
