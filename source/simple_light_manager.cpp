@@ -114,17 +114,17 @@ void SimpleLightManagerImpl::draw(sf::RenderTarget& renderTarget)
 
 void SimpleLightManagerImpl::setPosition(int lightSourceIndex, sf::Vector2f pos)
 {
-	//todo: implement
+	lights[lightSourceIndex].pos = pos;
 }
 
 void SimpleLightManagerImpl::removeLightSource(int lightSourceIndex)
 {
-	//todo: implement
+	lights.erase(lightSourceIndex);
 }
 
 void SimpleLightManagerImpl::onWindowResize(float screenWidth, float screenHeight)
 {
-	//todo: implement
+	//todo: store lightmap texture and re-create it, only when window is resized
 }
 
 SimpleLightManager::SimpleLightManager(float screenWidth, float screenHeight, float tileSize)

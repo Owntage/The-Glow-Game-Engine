@@ -3,10 +3,12 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include <SFML/Network.hpp>
-
 #include <Box2D/Box2D.h>
+#include <vector>
 
 #include "light_manager.h"
+
+using namespace std;
 
 void testBox2d()
 {
@@ -26,16 +28,20 @@ int main(int argc, char *argv[])
 	window.setFramerateLimit(30);
 	sf::View view(sf::Vector2f(0, 0), sf::Vector2f(screen.width / 32, screen.height / 32));
 	window.setView(view);
-	sf::Color background = sf::Color::White;
+	sf::Color background = sf::Color(255, 255, 192);
 
 	ShadowLightManager lightManager(screen.width, screen.height, 32);
 	SimpleLightManager simpleLightManager(screen.width, screen.height, 32);
+	vector<sf::Vector2f> positions;
+	vector<float> radiuses;
+	vector<float> phases;
 	for (int i = 0; i < 100; i++)
 	{
-		simpleLightManager.addLightSource(sf::Vector2f(rand() % 1000 - 500, rand() % 1000 - 500), sf::Color(rand() % 64, rand() % 64, rand() % 64), rand() % 20 + 5);
+		radiuses.push_back(rand()% 200 + 50);
+		phases.push_back(((float) (rand() % 10000)) / 1000.0f);
+		positions.push_back(sf::Vector2f(rand() % 1000 - 500, rand() % 1000 - 500));
+		simpleLightManager.addLightSource(positions.back(), sf::Color(rand() % 64, rand() % 64, rand() % 64), rand() % 10 + 10);
 	}
-	simpleLightManager.addLightSource(sf::Vector2f(0, 0), sf::Color::Magenta, 10);
-	simpleLightManager.addLightSource(sf::Vector2f(-100, 0), sf::Color::Magenta, 10);
 	//lightManager.addRectangleObstacle(sf::Vector2f(0, 0), sf::Vector2f(32, 32));
 
 	sf::RectangleShape rect(sf::Vector2f(1, 1));
@@ -43,6 +49,14 @@ int main(int argc, char *argv[])
 
 	while (window.isOpen())
 	{
+		for (int i = 0; i < 100; i++)
+		{
+			sf::Vector2f pos = positions[i];
+			sf::Vector2f offset(cosf(phases[i]) * radiuses[i], sinf(phases[i]) * radiuses[i]);
+			phases[i] += 0.01 * radiuses[i] / 100.0f;
+			simpleLightManager.setPosition(i, pos + offset);
+		}
+
 		sf::Event event;
 		while (window.pollEvent(event))
 		{
