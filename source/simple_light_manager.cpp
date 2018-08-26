@@ -25,6 +25,8 @@ struct LightData
 struct SimpleLightManagerImpl
 {
 	SimpleLightManagerImpl(float screenWidth, float screenHeight, float tileSize);
+	SimpleLightManagerImpl();
+	void init(float screenWidth, float screenHeight, float tileSize);
 	int addLightSource(sf::Vector2f pos, sf::Color color, float intensity);
 	int addRectangleObstacle(sf::Vector2f pos, sf::Vector2f size);
 	void draw(sf::RenderTarget& renderTarget);
@@ -40,9 +42,18 @@ private:
 };
 
 SimpleLightManagerImpl::SimpleLightManagerImpl(float screenWidth, float screenHeight, float tileSize) :
-	lightCounter(0),
-	tileSize(tileSize)
+	lightCounter(0)
 {
+	init(screenWidth, screenHeight, tileSize);
+}
+
+SimpleLightManagerImpl::SimpleLightManagerImpl() :
+	lightCounter(0)
+{}
+
+void SimpleLightManagerImpl::init(float screenWidth, float screenHeight, float tileSize)
+{
+	this->tileSize = tileSize;
 	sf::Image bubbleImage;
 	bubbleImage.create(BUBBLE_TEXTURE_SIZE, BUBBLE_TEXTURE_SIZE, sf::Color::Black);
 	float fSize = (float) BUBBLE_TEXTURE_SIZE;
@@ -132,9 +143,19 @@ SimpleLightManager::SimpleLightManager(float screenWidth, float screenHeight, fl
 	impl = new SimpleLightManagerImpl(screenWidth, screenHeight, tileSize);
 }
 
+SimpleLightManager::SimpleLightManager()
+{
+	impl = new SimpleLightManagerImpl();
+}
+
 SimpleLightManager::~SimpleLightManager()
 {
 	delete impl;
+}
+
+void SimpleLightManager::init(float screenWidth, float screenHeight, float tileSize)
+{
+	impl->init(screenWidth, screenHeight, tileSize);
 }
 
 int SimpleLightManager::addLightSource(sf::Vector2f pos, sf::Color color, float intensity)

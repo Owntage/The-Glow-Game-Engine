@@ -7,6 +7,7 @@
 struct ILightManager
 {
 	virtual ~ILightManager() {}
+	virtual void init(float screenWidth, float screenHeight, float tileSize) = 0;
 	virtual int addLightSource(sf::Vector2f pos, sf::Color color, float intensity) = 0;
 	virtual int addRectangleObstacle(sf::Vector2f pos, sf::Vector2f size) = 0;
 	virtual void draw(sf::RenderTarget& renderTarget) = 0;
@@ -15,12 +16,19 @@ struct ILightManager
 	virtual void onWindowResize(float screenWidth, float screenHeight) = 0;
 };
 
+struct LightManagerFactory
+{
+	static ILightManager& getLightManager(float screenWidth, float screenHeight, float tileSize);
+};
+
 struct SimpleLightManagerImpl;
 
 struct SimpleLightManager : ILightManager
 {
 	SimpleLightManager(float screenWidth, float screenHeight, float tileSize);
+	SimpleLightManager();
 	~SimpleLightManager();
+	void init(float screenWidth, float screenHeight, float tileSize);
 	int addLightSource(sf::Vector2f pos, sf::Color color, float intensity);
 	int addRectangleObstacle(sf::Vector2f pos, sf::Vector2f size);
 	void draw(sf::RenderTarget& renderTarget);
@@ -36,7 +44,9 @@ struct ShadowLightManagerImpl;
 struct ShadowLightManager : ILightManager
 {
 	ShadowLightManager(float screenWidth, float screenHeight, float tileSize);
+	ShadowLightManager();
 	~ShadowLightManager();
+	void init(float screenWidth, float screenHeight, float tileSize);
 	int addLightSource(sf::Vector2f pos, sf::Color color, float intensity);
 	int addRectangleObstacle(sf::Vector2f pos, sf::Vector2f size);
 	void draw(sf::RenderTarget& renderTarget);

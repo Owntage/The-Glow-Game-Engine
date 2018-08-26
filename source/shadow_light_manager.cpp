@@ -9,6 +9,8 @@
 struct ShadowLightManagerImpl
 {
 	ShadowLightManagerImpl(float screenWidth, float screenHeight, float tileWidth);
+	ShadowLightManagerImpl();
+	void init(float screenWidth, float screenHeight, float tileSize);
 	int addLightSource(sf::Vector2f pos, sf::Color color, float intensity);
 	int addRectangleObstacle(sf::Vector2f pos, sf::Vector2f size);
 	void draw(sf::RenderTarget& renderTarget);
@@ -45,14 +47,24 @@ private:
 };
 
 ShadowLightManagerImpl::ShadowLightManagerImpl(float screenWidth, float screenHeight, float tileWidth) :
-		screenWidth(screenWidth),
-		screenHeight(screenHeight),
-		tileWidth(tileWidth),
-		counter(0),
 		shaderArraySize(0),
 		shadowsArraySize(0),
 		textureDivider(1)
 {
+	init(screenWidth, screenHeight, tileWidth);
+}
+
+ShadowLightManagerImpl::ShadowLightManagerImpl() :
+	shaderArraySize(0),
+	shadowsArraySize(0),
+	textureDivider(1)
+{}
+
+void ShadowLightManagerImpl::init(float screenWidth, float screenHeight, float tileSize)
+{
+	this->screenWidth = screenWidth;
+	this->screenHeight = screenHeight;
+	this->tileWidth = tileSize;
 
 	sf::FileInputStream vertexStream;
 	vertexStream.open(LIGHT_VERTEX_SHADER);
@@ -188,9 +200,19 @@ ShadowLightManager::ShadowLightManager(float screenWidth, float screenHeight, fl
 	impl = new ShadowLightManagerImpl(screenWidth, screenHeight, tileWidth);
 }
 
+ShadowLightManager::ShadowLightManager()
+{
+	impl = new ShadowLightManagerImpl();
+}
+
 ShadowLightManager::~ShadowLightManager()
 {
 	delete impl;
+}
+
+void ShadowLightManager::init(float screenWidth, float screenHeight, float tileSize)
+{
+	impl->init(screenWidth, screenHeight, tileSize);
 }
 
 int ShadowLightManager::addLightSource(sf::Vector2f pos, sf::Color color, float intensity)
