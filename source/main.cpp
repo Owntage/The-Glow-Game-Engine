@@ -30,8 +30,7 @@ int main(int argc, char *argv[])
 	window.setView(view);
 	sf::Color background = sf::Color(255, 255, 192);
 
-	ShadowLightManager lightManager(screen.width, screen.height, 32);
-	SimpleLightManager simpleLightManager(screen.width, screen.height, 32);
+	ILightManager& lightManager = LightManagerFactory::getLightManager(screen.width, screen.height, 32);
 	vector<sf::Vector2f> positions;
 	vector<float> radiuses;
 	vector<float> phases;
@@ -40,7 +39,7 @@ int main(int argc, char *argv[])
 		radiuses.push_back(rand()% 200 + 50);
 		phases.push_back(((float) (rand() % 10000)) / 1000.0f);
 		positions.push_back(sf::Vector2f(rand() % 1000 - 500, rand() % 1000 - 500));
-		simpleLightManager.addLightSource(positions.back(), sf::Color(rand() % 64, rand() % 64, rand() % 64), rand() % 10 + 10);
+		lightManager.addLightSource(positions.back(), sf::Color(rand() % 64, rand() % 64, rand() % 64), rand() % 10 + 10);
 	}
 	//lightManager.addRectangleObstacle(sf::Vector2f(0, 0), sf::Vector2f(32, 32));
 
@@ -54,7 +53,7 @@ int main(int argc, char *argv[])
 			sf::Vector2f pos = positions[i];
 			sf::Vector2f offset(cosf(phases[i]) * radiuses[i], sinf(phases[i]) * radiuses[i]);
 			phases[i] += 0.01 * radiuses[i] / 100.0f;
-			simpleLightManager.setPosition(i, pos + offset);
+			lightManager.setPosition(i, pos + offset);
 		}
 
 		sf::Event event;
@@ -87,7 +86,7 @@ int main(int argc, char *argv[])
 
 		window.clear(background);
 		window.draw(rect);
-		simpleLightManager.draw(window);
+		lightManager.draw(window);
 		window.display();
 
 	}
