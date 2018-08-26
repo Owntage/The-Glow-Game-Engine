@@ -1,17 +1,12 @@
 #include "light_manager.h"
 
-ILightManager& LightManagerFactory::getLightManager(float screenWidth, float screenHeight, float tileSize)
+
+ILightManager* LightManagerFactory::createLightManager(float screenWidth, float screenHeight, float tileSize)
 {
 #ifdef DESKTOP
-	static ShadowLightManager result;
+	return new ShadowLightManager(screenWidth, screenHeight, tileSize);
 #else
-	static SimpleLightManager result;
+	return new SimpleLightManager(screenWidth, screenHeight, tileSize);
 #endif
-	static bool initialized = false;
-	if (!initialized)
-	{
-		result.init(screenWidth, screenHeight, tileSize);
-	}
-	return result;
 }
 

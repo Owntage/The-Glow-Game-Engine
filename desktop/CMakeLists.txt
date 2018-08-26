@@ -5,7 +5,8 @@ file(GLOB SOURCE_FILES ${PROJECT_SOURCE_DIR}/../source/*.cpp ${PROJECT_SOURCE_DI
 
 add_executable(game ${SOURCE_FILES})
 
-add_definitions(-std=c++11 -g)
+add_definitions(-std=c++11 -g -D DESKTOP)
+
 
 set(SFML_ROOT ${PROJECT_SOURCE_DIR}/../)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")

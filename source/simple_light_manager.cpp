@@ -119,6 +119,7 @@ void SimpleLightManagerImpl::draw(sf::RenderTarget& renderTarget)
 	resultRect.setOrigin(renderTarget.getView().getSize() / 2.0f);
 	resultRect.setSize(renderTarget.getView().getSize());
 	resultRect.setPosition(renderTarget.getView().getCenter());
+
 	renderStates.blendMode = sf::BlendMultiply;
 	renderTarget.draw(resultRect, renderStates);
 }

@@ -18,7 +18,7 @@ struct ILightManager
 
 struct LightManagerFactory
 {
-	static ILightManager& getLightManager(float screenWidth, float screenHeight, float tileSize);
+	static ILightManager* createLightManager(float screenWidth, float screenHeight, float tileSize);
 };
 
 struct SimpleLightManagerImpl;
