@@ -1,23 +1,32 @@
 #include "light_manager.h"
-
+#include <iostream>
 
 #define LIGHT_VERTEX_SHADER "res/light_vertex_shader.txt"
 #define MULTIPLY_FRAGMENT_SHADER "res/divide_fragment_shader.txt"
 
+#define DEFINE_PLACEHOLDER "$define"
+#define LIGHT_SIZE_DEFINE "LIGHT_SIZE"
+#define OBSTACLE_SIZE_DEFINE "OBSTACLE_SIZE"
+#define ADDITIVE_DEFINE "ADDITIVE_DEFINE"
+
+#define DEFAULT_LIGHTS 200
+#define DEFAULT_OBSTACLES 100
 
 static std::string lightFragmentShader =
 		"#version 120\n"
+		DEFINE_PLACEHOLDER
 		"\n"
 		"varying vec2 pos_vec;\n"
 		"varying vec2 tex_vec;\n"
 		"\n"
 		"uniform vec2 offset;\n"
-		"uniform vec2 light_pos[200];\n"
-		"uniform vec3 light_color[200];\n"
-		"uniform float light_intensity[200];\n"
+		"uniform vec2 light_pos[" LIGHT_SIZE_DEFINE "];\n"
+		"uniform vec3 light_color[" LIGHT_SIZE_DEFINE "];\n"
+		"uniform float light_intensity[" LIGHT_SIZE_DEFINE "];\n"
+		"uniform float light_additive_intensity[" LIGHT_SIZE_DEFINE "];\n"
 		"\n"
-		"uniform vec2 shadow_pos[100];\n"
-		"uniform vec2 shadow_size[100];\n"
+		"uniform vec2 shadow_pos[" OBSTACLE_SIZE_DEFINE "];\n"
+		"uniform vec2 shadow_size[" OBSTACLE_SIZE_DEFINE "];\n"
 		"\n"
 		"\n"
 		"uniform int sources_size;\n"
@@ -318,6 +327,9 @@ static std::string lightFragmentShader =
 		"    shadow_intensity = min(shadow_intensity, 1.0);\n"
 		"    \n"
 		"    multiplier *= shadow_intensity;\n"
+		"#ifdef " ADDITIVE_DEFINE "\n"
+		"    multiplier *= light_additive_intensity[i];\n"
+		"#endif\n"
 		"    \n"
 		"    color.r += light_color[i].r * multiplier;\n"
 		"    color.g += light_color[i].g * multiplier;\n"
@@ -382,6 +394,20 @@ ShadowLightManagerImpl::ShadowLightManagerImpl() :
 	textureDivider(1)
 {}
 
+static std::string prepareLightMultiplyShader()
+{
+	std::string result = lightFragmentShader;
+	std::string definePlaceholderStr(DEFINE_PLACEHOLDER);
+	std::string defines =
+		"#define " LIGHT_SIZE_DEFINE " " + std::to_string(DEFAULT_LIGHTS) + "\n"
+		"#define " ADDITIVE_DEFINE "\n"
+		"#define " OBSTACLE_SIZE_DEFINE " " + std::to_string(DEFAULT_OBSTACLES) +"\n";
+	;
+	result.replace(result.find(DEFINE_PLACEHOLDER), definePlaceholderStr.size(), defines);
+	std::cout << result << std::endl;
+	return result;
+}
+
 void ShadowLightManagerImpl::init(float screenWidth, float screenHeight, float tileSize)
 {
 	this->screenWidth = screenWidth;
@@ -391,13 +417,13 @@ void ShadowLightManagerImpl::init(float screenWidth, float screenHeight, float t
 	sf::FileInputStream vertexStream;
 	vertexStream.open(LIGHT_VERTEX_SHADER);
 	sf::MemoryInputStream fragmentStream;
-	fragmentStream.open(lightFragmentShader.c_str(), lightFragmentShader.size());
+	std::string multiplyFragmentShader = prepareLightMultiplyShader();
+	fragmentStream.open(multiplyFragmentShader.c_str(), multiplyFragmentShader.size());
 	shader.loadFromStream(vertexStream, fragmentStream);
 
 	sf::FileInputStream multiplyFragmentStream;
 	multiplyFragmentStream.open(MULTIPLY_FRAGMENT_SHADER);
 	multiplyShader.loadFromStream(multiplyFragmentStream, sf::Shader::Fragment);
-	//vertices.setPrimitiveType(sf::Quads);
 	renderTexture.create(screenWidth / textureDivider, screenHeight / textureDivider);
 	renderTexture.setSmooth(true);
 
