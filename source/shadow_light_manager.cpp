@@ -460,12 +460,13 @@ int ShadowLightManagerImpl::addLightSource(sf::Vector2f pos, sf::Color color, fl
 	colorVec.x /= 255.0f;
 	colorVec.y /= 255.0f;
 	colorVec.z /= 255.0f;
-	shadowShader.setUniform("light_color[" + std::to_string(shaderArraySize) + "]", colorVec);
-	shadowShader.setUniform("light_intensity[" + std::to_string(shaderArraySize) + "]", intensity);
-	shadowShader.setUniform("sources_size", ++shaderArraySize);
-	additiveShadowShader.setUniform("light_color[" + std::to_string(shaderArraySize) + "]", colorVec);
-	additiveShadowShader.setUniform("light_intensity[" + std::to_string(shaderArraySize) + "]", intensity);
-	additiveShadowShader.setUniform("sources_size", ++shaderArraySize);
+	shaderArraySize++;
+	shadowShader.setUniform("light_color[" + std::to_string(shaderArraySize - 1) + "]", colorVec);
+	shadowShader.setUniform("light_intensity[" + std::to_string(shaderArraySize - 1) + "]", intensity);
+	shadowShader.setUniform("sources_size", shaderArraySize);
+	additiveShadowShader.setUniform("light_color[" + std::to_string(shaderArraySize - 1) + "]", colorVec);
+	additiveShadowShader.setUniform("light_intensity[" + std::to_string(shaderArraySize - 1) + "]", intensity);
+	additiveShadowShader.setUniform("sources_size", shaderArraySize);
 
 	idToData[counter] = LightData(pos, colorVec, intensity);
 	return counter++;
@@ -485,9 +486,6 @@ int ShadowLightManagerImpl::addRectangleObstacle(sf::Vector2f pos, sf::Vector2f 
 
 void ShadowLightManagerImpl::draw(sf::RenderTarget& renderTarget)
 {
-	sf::RenderStates renderStates;
-	renderStates.shader = &shadowShader;
-	renderStates.blendMode = sf::BlendAdd;
 	sf::Vector2f center = renderTarget.getView().getCenter();
 
 
@@ -506,12 +504,17 @@ void ShadowLightManagerImpl::draw(sf::RenderTarget& renderTarget)
 	center.y *= tileWidth;
 
 	shadowShader.setUniform("offset", center);
+	additiveShadowShader.setUniform("offset", center);
 
 	std::vector<sf::Vertex> vertices;
 	vertices.push_back(sf::Vertex(sf::Vector2f(-screenWidth / 2, -screenHeight / 2)));
 	vertices.push_back(sf::Vertex(sf::Vector2f(screenWidth / 2, -screenHeight / 2)));
 	vertices.push_back(sf::Vertex(sf::Vector2f(screenWidth / 2, screenHeight / 2)));
 	vertices.push_back(sf::Vertex(sf::Vector2f(-screenWidth / 2, screenHeight / 2)));
+
+	sf::RenderStates renderStates;
+	renderStates.shader = &additiveShadowShader;
+	renderStates.blendMode = sf::BlendAdd;
 
 	sf::View lightView;
 	lightView.setCenter(sf::Vector2f(0, 0));
