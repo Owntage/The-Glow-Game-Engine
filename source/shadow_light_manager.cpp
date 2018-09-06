@@ -345,7 +345,7 @@ struct ShadowLightManagerImpl
 	ShadowLightManagerImpl(float screenWidth, float screenHeight, float tileWidth);
 	ShadowLightManagerImpl();
 	void init(float screenWidth, float screenHeight, float tileSize);
-	int addLightSource(sf::Vector2f pos, sf::Color color, float intensity);
+	int addLightSource(sf::Vector2f pos, sf::Color color, float intensity, float additiveFactor);
 	int addRectangleObstacle(sf::Vector2f pos, sf::Vector2f size);
 	void draw(sf::RenderTarget& renderTarget);
 	void setPosition(int lightSourceIndex, sf::Vector2f pos);
@@ -371,7 +371,8 @@ private:
 	int shadowsArraySize;
 	int counter;
 	int textureDivider;
-	sf::Shader shader;
+	sf::Shader shadowShader;
+	sf::Shader additiveShadowShader;
 	sf::Shader multiplyShader;
 	sf::RectangleShape shape;
 	sf::RenderTexture renderTexture;
@@ -399,12 +400,23 @@ static std::string prepareLightMultiplyShader()
 	std::string result = lightFragmentShader;
 	std::string definePlaceholderStr(DEFINE_PLACEHOLDER);
 	std::string defines =
+	"#define " LIGHT_SIZE_DEFINE " " + std::to_string(DEFAULT_LIGHTS) + "\n"
+	"#define " OBSTACLE_SIZE_DEFINE " " + std::to_string(DEFAULT_OBSTACLES) +"\n";
+	;
+	result.replace(result.find(DEFINE_PLACEHOLDER), definePlaceholderStr.size(), defines);
+	return result;
+}
+
+static std::string prepareLightAdditiveShader()
+{
+	std::string result = lightFragmentShader;
+	std::string definePlaceholderStr(DEFINE_PLACEHOLDER);
+	std::string defines =
 		"#define " LIGHT_SIZE_DEFINE " " + std::to_string(DEFAULT_LIGHTS) + "\n"
 		"#define " ADDITIVE_DEFINE "\n"
 		"#define " OBSTACLE_SIZE_DEFINE " " + std::to_string(DEFAULT_OBSTACLES) +"\n";
 	;
 	result.replace(result.find(DEFINE_PLACEHOLDER), definePlaceholderStr.size(), defines);
-	std::cout << result << std::endl;
 	return result;
 }
 
@@ -416,10 +428,16 @@ void ShadowLightManagerImpl::init(float screenWidth, float screenHeight, float t
 
 	sf::FileInputStream vertexStream;
 	vertexStream.open(LIGHT_VERTEX_SHADER);
-	sf::MemoryInputStream fragmentStream;
+	sf::MemoryInputStream fragmentMultiplyStream;
 	std::string multiplyFragmentShader = prepareLightMultiplyShader();
-	fragmentStream.open(multiplyFragmentShader.c_str(), multiplyFragmentShader.size());
-	shader.loadFromStream(vertexStream, fragmentStream);
+	fragmentMultiplyStream.open(multiplyFragmentShader.c_str(), multiplyFragmentShader.size());
+	shadowShader.loadFromStream(vertexStream, fragmentMultiplyStream);
+
+	vertexStream.seek(0);
+	sf::MemoryInputStream fragmentAdditiveStream;
+	std::string additiveFragmentShader = prepareLightAdditiveShader();
+	fragmentAdditiveStream.open(additiveFragmentShader.c_str(), additiveFragmentShader.size());
+	additiveShadowShader.loadFromStream(vertexStream, fragmentAdditiveStream);
 
 	sf::FileInputStream multiplyFragmentStream;
 	multiplyFragmentStream.open(MULTIPLY_FRAGMENT_SHADER);
@@ -431,18 +449,23 @@ void ShadowLightManagerImpl::init(float screenWidth, float screenHeight, float t
 	shape.setOrigin(screenWidth / tileWidth / 2, screenHeight / tileWidth / 2);
 }
 
-int ShadowLightManagerImpl::addLightSource(sf::Vector2f pos, sf::Color color, float intensity)
+int ShadowLightManagerImpl::addLightSource(sf::Vector2f pos, sf::Color color, float intensity, float additiveFactor)
 {
 	idToShaderIndex[counter] = shaderArraySize;
 	shaderIndexToId[shaderArraySize] = counter;
-	shader.setUniform("light_pos[" + std::to_string(shaderArraySize) + "]", pos);
+	shadowShader.setUniform("light_pos[" + std::to_string(shaderArraySize) + "]", pos);
+	additiveShadowShader.setUniform("light_pos[" + std::to_string(shaderArraySize) + "]", pos);
+	additiveShadowShader.setUniform("light_additive_intensity[" + std::to_string(shaderArraySize) + "]", additiveFactor);
 	sf::Vector3f colorVec((int) color.r, (int) color.g, (int) color.b);
 	colorVec.x /= 255.0f;
 	colorVec.y /= 255.0f;
 	colorVec.z /= 255.0f;
-	shader.setUniform("light_color[" + std::to_string(shaderArraySize) + "]", colorVec);
-	shader.setUniform("light_intensity[" + std::to_string(shaderArraySize) + "]", intensity);
-	shader.setUniform("sources_size", ++shaderArraySize);
+	shadowShader.setUniform("light_color[" + std::to_string(shaderArraySize) + "]", colorVec);
+	shadowShader.setUniform("light_intensity[" + std::to_string(shaderArraySize) + "]", intensity);
+	shadowShader.setUniform("sources_size", ++shaderArraySize);
+	additiveShadowShader.setUniform("light_color[" + std::to_string(shaderArraySize) + "]", colorVec);
+	additiveShadowShader.setUniform("light_intensity[" + std::to_string(shaderArraySize) + "]", intensity);
+	additiveShadowShader.setUniform("sources_size", ++shaderArraySize);
 
 	idToData[counter] = LightData(pos, colorVec, intensity);
 	return counter++;
@@ -450,17 +473,20 @@ int ShadowLightManagerImpl::addLightSource(sf::Vector2f pos, sf::Color color, fl
 
 int ShadowLightManagerImpl::addRectangleObstacle(sf::Vector2f pos, sf::Vector2f size)
 {
-	shader.setUniform("shadow_pos[" + std::to_string(shadowsArraySize) + "]", pos);
-	shader.setUniform("shadow_size[" + std::to_string(shadowsArraySize) + "]", size);
+	shadowShader.setUniform("shadow_pos[" + std::to_string(shadowsArraySize) + "]", pos);
+	shadowShader.setUniform("shadow_size[" + std::to_string(shadowsArraySize) + "]", size);
+	additiveShadowShader.setUniform("shadow_pos[" + std::to_string(shadowsArraySize) + "]", pos);
+	additiveShadowShader.setUniform("shadow_size[" + std::to_string(shadowsArraySize) + "]", size);
 	shadowsArraySize++;
-	shader.setUniform("shadows_size", shadowsArraySize);
+	shadowShader.setUniform("shadows_size", shadowsArraySize);
+	additiveShadowShader.setUniform("shadows_size", shadowsArraySize);
 	return counter++;
 }
 
 void ShadowLightManagerImpl::draw(sf::RenderTarget& renderTarget)
 {
 	sf::RenderStates renderStates;
-	renderStates.shader = &shader;
+	renderStates.shader = &shadowShader;
 	renderStates.blendMode = sf::BlendAdd;
 	sf::Vector2f center = renderTarget.getView().getCenter();
 
@@ -468,8 +494,6 @@ void ShadowLightManagerImpl::draw(sf::RenderTarget& renderTarget)
 	double multiplier = tileWidth / textureDivider;
 	double offsetX = center.x * multiplier;
 	double offsetY = center.y * multiplier;
-	//offsetX = offsetX - floor(offsetX);
-	//offsetY = offsetY - floor(offsetY);
 	offsetX /= multiplier;
 	offsetY /= multiplier;
 
@@ -481,7 +505,7 @@ void ShadowLightManagerImpl::draw(sf::RenderTarget& renderTarget)
 	center.x *= tileWidth;
 	center.y *= tileWidth;
 
-	shader.setUniform("offset", center);
+	shadowShader.setUniform("offset", center);
 
 	std::vector<sf::Vertex> vertices;
 	vertices.push_back(sf::Vertex(sf::Vector2f(-screenWidth / 2, -screenHeight / 2)));
@@ -519,7 +543,8 @@ void ShadowLightManagerImpl::draw(sf::RenderTarget& renderTarget)
 
 void ShadowLightManagerImpl::setPosition(int lightSourceID, sf::Vector2f pos)
 {
-	shader.setUniform("light_pos[" + std::to_string(idToShaderIndex[lightSourceID]) + "]", pos);
+	shadowShader.setUniform("light_pos[" + std::to_string(idToShaderIndex[lightSourceID]) + "]", pos);
+	additiveShadowShader.setUniform("light_pos[" + std::to_string(idToShaderIndex[lightSourceID]) + "]", pos);
 }
 
 void ShadowLightManagerImpl::removeLightSource(int lightSourceID)
@@ -530,11 +555,15 @@ void ShadowLightManagerImpl::removeLightSource(int lightSourceID)
 	int currentIndex = idToShaderIndex[lightSourceID];
 	shaderIndexToId[currentIndex] = lastId;
 	idToShaderIndex[lastId] = currentIndex;
-	shader.setUniform("light_pos[" + std::to_string(currentIndex) + "]", lastData.position);
-	shader.setUniform("light_color[" + std::to_string(currentIndex) + "]", lastData.color);
-	shader.setUniform("light_intensity[" + std::to_string(currentIndex) + "]", lastData.intensity);
+	shadowShader.setUniform("light_pos[" + std::to_string(currentIndex) + "]", lastData.position);
+	shadowShader.setUniform("light_color[" + std::to_string(currentIndex) + "]", lastData.color);
+	shadowShader.setUniform("light_intensity[" + std::to_string(currentIndex) + "]", lastData.intensity);
+	additiveShadowShader.setUniform("light_pos[" + std::to_string(currentIndex) + "]", lastData.position);
+	additiveShadowShader.setUniform("light_color[" + std::to_string(currentIndex) + "]", lastData.color);
+	additiveShadowShader.setUniform("light_intensity[" + std::to_string(currentIndex) + "]", lastData.intensity);
 	shaderArraySize--;
-	shader.setUniform("sources_size", shaderArraySize);
+	shadowShader.setUniform("sources_size", shaderArraySize);
+	additiveShadowShader.setUniform("sources_size", shaderArraySize);
 
 	//todo: remove lightSourceID data from maps
 
@@ -568,9 +597,9 @@ void ShadowLightManager::init(float screenWidth, float screenHeight, float tileS
 	impl->init(screenWidth, screenHeight, tileSize);
 }
 
-int ShadowLightManager::addLightSource(sf::Vector2f pos, sf::Color color, float intensity)
+int ShadowLightManager::addLightSource(sf::Vector2f pos, sf::Color color, float intensity, float additiveFactor)
 {
-	return impl->addLightSource(pos, color, intensity);
+	return impl->addLightSource(pos, color, intensity, additiveFactor);
 }
 
 int ShadowLightManager::addRectangleObstacle(sf::Vector2f pos, sf::Vector2f size)

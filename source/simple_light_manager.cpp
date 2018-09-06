@@ -27,7 +27,7 @@ struct SimpleLightManagerImpl
 	SimpleLightManagerImpl(float screenWidth, float screenHeight, float tileSize);
 	SimpleLightManagerImpl();
 	void init(float screenWidth, float screenHeight, float tileSize);
-	int addLightSource(sf::Vector2f pos, sf::Color color, float intensity);
+	int addLightSource(sf::Vector2f pos, sf::Color color, float intensity, float additiveFactor);
 	int addRectangleObstacle(sf::Vector2f pos, sf::Vector2f size);
 	void draw(sf::RenderTarget& renderTarget);
 	void setPosition(int lightSourceIndex, sf::Vector2f pos);
@@ -81,9 +81,9 @@ void SimpleLightManagerImpl::init(float screenWidth, float screenHeight, float t
 	bubbleTexture.generateMipmap();
 }
 
-int SimpleLightManagerImpl::addLightSource(sf::Vector2f pos, sf::Color color, float intensity)
+int SimpleLightManagerImpl::addLightSource(sf::Vector2f pos, sf::Color color, float intensity, float additiveFactor)
 {
-	LightData lightData(intensity, color, pos, 0.5f);
+	LightData lightData(intensity, color, pos, additiveFactor);
 	lights[lightCounter] = lightData; //todo: make additive part configurable
 	return lightCounter++;
 }
@@ -159,9 +159,9 @@ void SimpleLightManager::init(float screenWidth, float screenHeight, float tileS
 	impl->init(screenWidth, screenHeight, tileSize);
 }
 
-int SimpleLightManager::addLightSource(sf::Vector2f pos, sf::Color color, float intensity)
+int SimpleLightManager::addLightSource(sf::Vector2f pos, sf::Color color, float intensity, float additiveFactor)
 {
-	return impl->addLightSource(pos, color, intensity);
+	return impl->addLightSource(pos, color, intensity, additiveFactor);
 }
 
 int SimpleLightManager::addRectangleObstacle(sf::Vector2f pos, sf::Vector2f size)

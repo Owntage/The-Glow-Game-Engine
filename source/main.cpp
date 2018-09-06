@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
 		radiuses.push_back(rand()% 200 + 50);
 		phases.push_back(((float) (rand() % 10000)) / 1000.0f);
 		positions.push_back(sf::Vector2f(rand() % 1000 - 500, rand() % 1000 - 500));
-		lightManager->addLightSource(positions.back(), sf::Color(rand() % 64, rand() % 64, rand() % 64), rand() % 10 + 20);
+		lightManager->addLightSource(positions.back(), sf::Color(rand() % 64, rand() % 64, rand() % 64), rand() % 10 + 20, 0.5);
 	}
 	lightManager->addRectangleObstacle(sf::Vector2f(0, 0), sf::Vector2f(32, 32));
 
