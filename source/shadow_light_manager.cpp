@@ -528,18 +528,15 @@ void ShadowLightManagerImpl::draw(sf::RenderTarget& renderTarget)
 
 	sf::RenderStates multiplyRenderStates;
 
-
-	/*
 	multiplyRenderStates.blendMode = sf::BlendAdd;
-	multiplyShader.setUniform("multiplier", 0.3f);
-	multiplyRenderStates.shader = &multiplyShader;
 	renderTarget.draw(shape, multiplyRenderStates);
-	*/
 
+	renderTexture.clear();
+	renderStates.shader = &shadowShader;
+	renderTexture.draw(&vertices[0], vertices.size(), sf::Quads, renderStates);
+	renderTexture.display();
 
 	multiplyRenderStates.blendMode = sf::BlendMultiply;
-	multiplyShader.setUniform("multiplier", 1.0f);
-	multiplyRenderStates.shader = &multiplyShader;
 	renderTarget.draw(shape, multiplyRenderStates);
 
 }
