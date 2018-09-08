@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "light_manager.h"
+#include "gui.h"
 
 using namespace std;
 
@@ -46,6 +47,11 @@ int main(int argc, char *argv[])
 	sf::RectangleShape rect(sf::Vector2f(1, 1));
 	rect.setOrigin(0.5, 0.5);
 
+	GuiManager guiManager(screen.width, screen.height);
+	NinePatchSprite sprite("res/background.png", true);
+	MovableWindowPanel windowPanel(0, 0, 400, 400, sprite);
+	guiManager.addElement(windowPanel);
+
 	while (window.isOpen())
 	{
 		for (int i = 0; i < 20; i++)
@@ -79,7 +85,6 @@ int main(int argc, char *argv[])
 					 */
 					break;
 				case sf::Event::TouchBegan:
-				   	//todo: move light source
 					break;
 			}
 		}
@@ -87,6 +92,7 @@ int main(int argc, char *argv[])
 		window.clear(background);
 		window.draw(rect);
 		lightManager->draw(window);
+		guiManager.draw(window);
 		window.display();
 
 	}
