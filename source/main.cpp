@@ -65,6 +65,7 @@ int main(int argc, char *argv[])
 		sf::Event event;
 		while (window.pollEvent(event))
 		{
+			guiManager.onEvent(event);
 			switch (event.type)
 			{
 				case sf::Event::Closed:
@@ -77,14 +78,7 @@ int main(int argc, char *argv[])
 					}
 					break;
 				case sf::Event::Resized:
-					/*
-					view.setSize(event.size.width / 32, event.size.height / 32);
-					view.setCenter(event.size.width / 64, event.size.height / 64);
-					lightManager.onWindowResize(event.size.width, event.size.height);
-					window.setView(view);
-					 */
-					break;
-				case sf::Event::TouchBegan:
+					//todo: somehow handle window resize
 					break;
 			}
 		}

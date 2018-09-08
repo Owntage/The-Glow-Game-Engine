@@ -87,7 +87,11 @@ private:
 
 struct GuiManager
 {
-	GuiManager(float screenWidth, float screenHeight) : guiView(sf::Vector2f(0.0f, 0.0f), sf::Vector2f(screenWidth, screenHeight))
+	GuiManager(float screenWidth, float screenHeight) :
+		guiView(sf::Vector2f(0.0f, 0.0f),
+		sf::Vector2f(screenWidth, screenHeight)),
+		screenWidth(screenWidth),
+		screenHeight(screenHeight)
 	{
 		renderTexture.create(screenWidth, screenHeight);
 		renderTexture.setView(guiView);
@@ -107,6 +111,8 @@ private:
 	int renderCounter;
 	sf::View guiView;
 	sf::RenderTexture renderTexture;
+	float screenWidth;
+	float screenHeight;
 	std::vector<GuiElement*> elements;
 };
 

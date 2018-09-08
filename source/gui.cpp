@@ -184,6 +184,8 @@ void GuiManager::draw(sf::RenderTarget& renderTarget)
 
 void GuiManager::onMouseMove(float x, float y)
 {
+	x -= screenWidth / 2;
+	y -= screenHeight / 2;
 	for(auto it = elements.begin(); it != elements.end(); it++)
 	{
 		(*it)->onMouseMove(x, y);
@@ -201,6 +203,8 @@ bool isInRectangle(float x, float y, float rectangleCenterX, float rectangleCent
 
 void GuiManager::onMouseClick(float x, float y, bool isReleased)
 {
+	x -= screenWidth / 2;
+	y -= screenHeight / 2;
 	if(isReleased)
 	{
 		for(auto it = elements.begin(); it != elements.end(); it++)
@@ -254,23 +258,35 @@ void GuiManager::onSpecialKey(unsigned int key)
 
 void GuiManager::onEvent(sf::Event& event)
 {
-	switch(event.type)
+	switch (event.type)
 	{
-		//todo: re-implement without using RenderWindow
-		/*
 		case sf::Event::MouseButtonPressed:
-			onMouseClick(event.mouseButton.x - RenderWindow::getInstance()->getWidth() / 2, 
-				event.mouseButton.y - RenderWindow::getInstance()->getHeight() / 2, false);
+			onMouseClick(event.mouseButton.x, event.mouseButton.y, false);
 			break;
 		case sf::Event::MouseButtonReleased:
-			onMouseClick(event.mouseButton.x - RenderWindow::getInstance()->getWidth() / 2, 
-				event.mouseButton.y - RenderWindow::getInstance()->getHeight() / 2, true);
+			onMouseClick(event.mouseButton.x, event.mouseButton.y, true);
 			break;
 		case sf::Event::MouseMoved:
-			onMouseMove(event.mouseMove.x - RenderWindow::getInstance()->getWidth() / 2, 
-				event.mouseMove.y - RenderWindow::getInstance()->getHeight() / 2);
+			onMouseMove(event.mouseMove.x, event.mouseMove.y);
 			break;
-		 */
+		case sf::Event::TouchBegan:
+			if (event.touch.finger == 0)
+			{
+				onMouseClick(event.touch.x, event.touch.y, false);
+			}
+			break;
+		case sf::Event::TouchEnded:
+			if (event.touch.finger == 0)
+			{
+				onMouseClick(event.touch.x, event.touch.y, true);
+			}
+			break;
+		case sf::Event::TouchMoved:
+			if (event.touch.finger == 0)
+			{
+				onMouseMove(event.touch.x, event.touch.y);
+			}
+			break;
 	}
 	if(event.type == sf::Event::KeyPressed && isSpecialKey(event.key.code))
 	{
