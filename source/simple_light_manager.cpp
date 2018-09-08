@@ -36,6 +36,8 @@ struct SimpleLightManagerImpl
 private:
 	const unsigned int BUBBLE_TEXTURE_SIZE = 100;
 	sf::Texture bubbleTexture;
+	sf::RenderTexture renderTexture;
+	sf::RenderTexture additiveRenderTexture;
 	unordered_map<int, LightData> lights;
 	int lightCounter;
 	float tileSize;
@@ -79,6 +81,9 @@ void SimpleLightManagerImpl::init(float screenWidth, float screenHeight, float t
 	bubbleTexture.loadFromImage(bubbleImage);
 	bubbleTexture.setSmooth(true);
 	bubbleTexture.generateMipmap();
+
+	renderTexture.create(screenWidth, screenHeight);
+	additiveRenderTexture.create(screenWidth, screenHeight);
 }
 
 int SimpleLightManagerImpl::addLightSource(sf::Vector2f pos, sf::Color color, float intensity, float additiveFactor)
@@ -98,9 +103,12 @@ void SimpleLightManagerImpl::draw(sf::RenderTarget& renderTarget)
 {
 	sf::RectangleShape rect;
 	rect.setTexture(&bubbleTexture);
-	sf::RenderTexture renderTexture;
-	renderTexture.create(renderTarget.getSize().x, renderTarget.getSize().y);
+
 	renderTexture.setView(renderTarget.getView());
+	additiveRenderTexture.setView(renderTarget.getView());
+	renderTexture.clear(sf::Color::Black);
+	additiveRenderTexture.clear(sf::Color::Black);
+
 	sf::RenderStates renderStates;
 	renderStates.blendMode = sf::BlendAdd;
 
@@ -112,16 +120,32 @@ void SimpleLightManagerImpl::draw(sf::RenderTarget& renderTarget)
 		rect.setPosition(data.pos / tileSize);
 		rect.setFillColor(data.color);
 		renderTexture.draw(rect, renderStates);
+		//now dealing with additive part
+		float r = data.color.r;
+		float g = data.color.g;
+		float b = data.color.b;
+		r *= data.additivePart;
+		g *= data.additivePart;
+		b *= data.additivePart;
+		rect.setFillColor(sf::Color(r, g, b));
+		additiveRenderTexture.draw(rect, renderStates);
+
 	}
 	renderTexture.display();
+	additiveRenderTexture.display();
 	sf::RectangleShape resultRect;
-	resultRect.setTexture(&renderTexture.getTexture());
 	resultRect.setOrigin(renderTarget.getView().getSize() / 2.0f);
 	resultRect.setSize(renderTarget.getView().getSize());
 	resultRect.setPosition(renderTarget.getView().getCenter());
 
-	renderStates.blendMode = sf::BlendMultiply;
+	renderStates.blendMode = sf::BlendAdd;
+	resultRect.setTexture(&additiveRenderTexture.getTexture());
 	renderTarget.draw(resultRect, renderStates);
+
+	renderStates.blendMode = sf::BlendMultiply;
+	resultRect.setTexture(&renderTexture.getTexture());
+	renderTarget.draw(resultRect, renderStates);
+
 }
 
 void SimpleLightManagerImpl::setPosition(int lightSourceIndex, sf::Vector2f pos)
