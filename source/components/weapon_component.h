@@ -5,7 +5,7 @@
 #include "component_update.h"
 #include "../event.h"
 #include "../properties_loader.h"
-#include <singleton.h>
+#include "../singleton.h"
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <vector>

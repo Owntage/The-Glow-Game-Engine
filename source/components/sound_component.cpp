@@ -5,7 +5,7 @@
 #include <algorithm>
 #include "sound_component.h"
 #include "variant_update.h"
-#include <variant/variant_event.h>
+#include "../variant/variant_event.h"
 
 using namespace std;
 

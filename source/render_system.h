@@ -117,7 +117,7 @@ private:
 
 struct RenderSystem
 {
-	RenderSystem(Console& console, GuiManager& guiManager, float screenWidth, float screenHeight, );
+	RenderSystem(Console& console, GuiManager& guiManager, float screenWidth, float screenHeight);
 	void onUpdate(std::vector<std::shared_ptr<ActorUpdate> > updates);
 	void draw(sf::RenderTarget& renderTarget);
 	void setMainActor(int mainActor);

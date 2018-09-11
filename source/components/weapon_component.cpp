@@ -1,4 +1,4 @@
-#include <variant/variant_event.h>
+#include "../variant/variant_event.h"
 #include "weapon_component.h"
 #include "physics_component.h"
 #include "coord_event.h"

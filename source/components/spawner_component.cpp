@@ -1,7 +1,7 @@
 #include "spawner_component.h"
 #include "coord_event.h"
 #include "create_event.h"
-#include "request.h"
+#include "../request.h"
 #include <boost/foreach.hpp>
 
 SpawnerComponent::SpawnerComponent() :

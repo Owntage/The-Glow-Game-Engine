@@ -8,8 +8,8 @@
 #include <map>
 #include <set>
 #include <vector>
-#include "../gui_source/singleton.h"
-#include "properties_loader.h"
+#include "../singleton.h"
+#include "../properties_loader.h"
 
 #define DEFAULT_FRICTION 12.0
 #define WORLD_PROPERTIES "res/world_properties.xml"

@@ -2,7 +2,7 @@
 #define VARIANT_EVENT_H
 
 #include "variant_map.h"
-#include "event.h"
+#include "../event.h"
 
 struct VariantEvent : VariantMap, Event
 {
