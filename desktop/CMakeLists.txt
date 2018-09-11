@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 project(android-sfml-game)
 
-file(GLOB SOURCE_FILES ${PROJECT_SOURCE_DIR}/../source/*.cpp ${PROJECT_SOURCE_DIR}/../source/*.h)
+file(GLOB SOURCE_FILES ${PROJECT_SOURCE_DIR}/../source/*.cpp ${PROJECT_SOURCE_DIR}/../source/components/*.cpp)
 
 add_executable(game ${SOURCE_FILES})
 
