@@ -24,7 +24,11 @@ include $(CLEAR_VARS)
 LOCAL_MODULE    := sfml-example
 
 LOCAL_SRC_FILES := $(wildcard $(LOCAL_PATH)/../../../../../source/*.cpp)
-LOCAL_SRC_FILES += $(wildcard $(LOCAL_PATH)/../../../../../source/*.h)
+LOCAL_SRC_FILES += $(wildcard $(LOCAL_PATH)/../../../../../source/components/*.cpp)
+
+LOCAL_C_INCLUDES := $(wildcard $(LOCAL_PATH)/../../../../../include)
+LOCAL_CPP_FEATURES := rtti
+LOCAL_CPP_FEATURES += exceptions
 
 LOCAL_SHARED_LIBRARIES := sfml-system-d
 LOCAL_SHARED_LIBRARIES += sfml-window-d

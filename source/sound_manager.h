@@ -6,7 +6,7 @@
 #define NETWORK_SHOOTER_PROJECT_SOUND_MANAGER_H
 
 #include <SFML/Audio.hpp>
-#include <c++/map>
+#include <map>
 
 struct SoundManager
 {
