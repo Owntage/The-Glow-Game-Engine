@@ -23,8 +23,8 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE    := sfml-example
 
-LOCAL_SRC_FILES := $(wildcard $(LOCAL_PATH)/../../../../../source/*.cpp)
-LOCAL_SRC_FILES += $(wildcard $(LOCAL_PATH)/../../../../../source/components/*.cpp)
+LOCAL_SRC_FILES := $(call LS_CPP,$(LOCAL_PATH),../../../../../source) \
+					$(call LS_CPP,$(LOCAL_PATH),../../../../../source/components)
 
 LOCAL_C_INCLUDES := $(wildcard $(LOCAL_PATH)/../../../../../include)
 LOCAL_CPP_FEATURES := rtti

@@ -4,6 +4,9 @@
 #include "../request.h"
 #include <boost/foreach.hpp>
 
+#include <cmath>
+using namespace std;
+
 SpawnerComponent::SpawnerComponent() :
 	currentTime(0.0f),
 	currentType(0)

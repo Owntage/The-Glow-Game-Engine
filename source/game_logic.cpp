@@ -3,6 +3,9 @@
 #include "components/create_event.h"
 #include "components/string_event.h"
 #include <iostream>
+#include <cmath>
+
+using namespace std;
 
 void GameLogic::thrownEventHandler(std::vector<std::shared_ptr<Event> >& events, bool global, int actorID)
 {
@@ -207,7 +210,7 @@ std::vector<std::shared_ptr<ActorUpdate> > GameLogic::getUpdates(int systemID, f
 	{
 		if(it->second->hasUpdates(systemID))
 		{
-			if(it->second->hasCoords && sqrt(pow(it->second->x - x, 2) + pow(it->second->y - y, 2)) >= updateRadius)
+			if(it->second->hasCoords && sqrt(pow(it->second->x - x, 2.0) + pow(it->second->y - y, 2.0)) >= updateRadius)
 			{
 				continue;
 			}
