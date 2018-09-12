@@ -6,7 +6,8 @@
 #include <Box2D/Box2D.h>
 #include <vector>
 
-#include "light_manager.h"
+#include "game_logic.h"
+#include "render_system.h"
 #include "gui.h"
 
 using namespace std;
@@ -31,37 +32,24 @@ int main(int argc, char *argv[])
 	window.setView(view);
 	sf::Color background = sf::Color::Black;
 
-	ILightManager* lightManager = LightManagerFactory::createLightManager(screen.width, screen.height, 32);
-	vector<sf::Vector2f> positions;
-	vector<float> radiuses;
-	vector<float> phases;
-	for (int i = 0; i < 20; i++)
-	{
-		radiuses.push_back(rand()% 200 + 50);
-		phases.push_back(((float) (rand() % 10000)) / 1000.0f);
-		positions.push_back(sf::Vector2f(rand() % 1000 - 500, rand() % 1000 - 500));
-		lightManager->addLightSource(positions.back(), sf::Color::Cyan, 20, 0.1);
-	}
-	lightManager->addRectangleObstacle(sf::Vector2f(0, 0), sf::Vector2f(32, 32));
-
-	sf::RectangleShape rect(sf::Vector2f(1, 1));
-	rect.setOrigin(0.5, 0.5);
-
 	GuiManager guiManager(screen.width, screen.height);
-	NinePatchSprite sprite("res/background.png", true);
-	MovableWindowPanel windowPanel(0, 0, 400, 400, sprite);
-	guiManager.addElement(windowPanel);
+	Console console(0, 0, 200, 200, guiManager);
+	console.setVisible(false);
+
+	ActorFactory actorFactory("res/properties.xml");
+	GameLogic gameLogic(actorFactory);
+	int mainActor = gameLogic.createActor("testActor");
+
+	gameLogic.createActor("cyan_light");
+
+
+
+	RenderSystem renderSystem(console, guiManager, screen.width, screen.height);
+	renderSystem.setMainActor(mainActor);
+	renderSystem.onUpdate(gameLogic.getUpdates(0));
 
 	while (window.isOpen())
 	{
-		for (int i = 0; i < 20; i++)
-		{
-			sf::Vector2f pos = positions[i];
-			sf::Vector2f offset(cosf(phases[i]) * radiuses[i], sinf(phases[i]) * radiuses[i]);
-			phases[i] += 0.01 * radiuses[i] / 100.0f;
-			lightManager->setPosition(i, pos + offset);
-		}
-
 		sf::Event event;
 		while (window.pollEvent(event))
 		{
@@ -83,9 +71,13 @@ int main(int argc, char *argv[])
 			}
 		}
 
+		Event timeEvent("timer");
+		gameLogic.onEvent(timeEvent);
+
+		renderSystem.onUpdate(gameLogic.getUpdates(0));
+
 		window.clear(background);
-		window.draw(rect);
-		lightManager->draw(window);
+		renderSystem.draw(window);
 		guiManager.draw(window);
 		window.display();
 
