@@ -23,16 +23,29 @@
 #include "components/actor_replace_component.h"
 #include "components/sound_component.h"
 
+#include <SFML/System.hpp>
+#include <sstream>
+
+
 ActorFactory::ActorFactory(std::string propertiesPath)
 {
-	boost::property_tree::ptree properties;
-	read_xml(propertiesPath, properties);
 
-		BOOST_FOREACH(auto& v, properties.get_child("properties"))
-		{
-			actors[v.first] = v.second;
-		}
-			
+	boost::property_tree::ptree properties;
+	sf::FileInputStream fileInputStream;
+	fileInputStream.open(propertiesPath);
+	std::stringstream stringstream;
+	for (int i = 0; i < fileInputStream.getSize(); i++)
+	{
+		char c;
+		fileInputStream.read(&c, 1);
+		stringstream << c;
+	}
+	read_xml(stringstream, properties);
+
+	BOOST_FOREACH(auto& v, properties.get_child("properties"))
+	{
+		actors[v.first] = v.second;
+	}
 }
 
 std::shared_ptr<Actor> ActorFactory::createActor(std::string id)

@@ -1,0 +1,4 @@
+<cancel_collision>
+    <first>bullet</first>
+	<second>bullet</second>
+</cancel_collision>

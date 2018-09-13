@@ -312,8 +312,8 @@ void DrawableActor::draw(sf::RenderTarget& renderTarget)
 	{
 		if(!hasLightSource)
 		{
-			lightSourceID = lightManager->addLightSource(sf::Vector2f(0, 0), 
-				sf::Color(renderData.lightR, renderData.lightG, renderData.lightB), 
+			lightSourceID = lightManager->addLightSource(sf::Vector2f(0, 0),
+				sf::Color(renderData.lightR, renderData.lightG, renderData.lightB),
 				renderData.lightIntensity, 0.3);
 			hasLightSource = true;
 		}

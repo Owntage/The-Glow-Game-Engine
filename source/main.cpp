@@ -33,20 +33,18 @@ int main(int argc, char *argv[])
 	sf::Color background = sf::Color::Black;
 
 	GuiManager guiManager(screen.width, screen.height);
-	Console console(0, 0, 200, 200, guiManager);
+	Console console(0, 0, 400, 200, guiManager);
 	console.setVisible(false);
 
 	ActorFactory actorFactory("res/properties.xml");
 	GameLogic gameLogic(actorFactory);
+
 	int mainActor = gameLogic.createActor("testActor");
-
 	gameLogic.createActor("cyan_light");
-
-
 
 	RenderSystem renderSystem(console, guiManager, screen.width, screen.height);
 	renderSystem.setMainActor(mainActor);
-	renderSystem.onUpdate(gameLogic.getUpdates(0));
+
 
 	while (window.isOpen())
 	{
@@ -70,9 +68,6 @@ int main(int argc, char *argv[])
 					break;
 			}
 		}
-
-		Event timeEvent("timer");
-		gameLogic.onEvent(timeEvent);
 
 		renderSystem.onUpdate(gameLogic.getUpdates(0));
 

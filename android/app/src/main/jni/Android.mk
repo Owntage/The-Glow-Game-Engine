@@ -26,7 +26,7 @@ LOCAL_MODULE    := sfml-example
 LOCAL_SRC_FILES := $(call LS_CPP,$(LOCAL_PATH),../../../../../source) \
 					$(call LS_CPP,$(LOCAL_PATH),../../../../../source/components)
 
-LOCAL_C_INCLUDES := $(wildcard $(LOCAL_PATH)/../../../../../include)
+LOCAL_C_INCLUDES := $(wildcard $(LOCAL_PATH)/../../../../../android-include)
 LOCAL_CPP_FEATURES := rtti
 LOCAL_CPP_FEATURES += exceptions
 
