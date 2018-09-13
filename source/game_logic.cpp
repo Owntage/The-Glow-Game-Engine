@@ -2,6 +2,7 @@
 #include "delete_update.h"
 #include "components/create_event.h"
 #include "components/string_event.h"
+#include "components/variant_update.h"
 #include <iostream>
 #include <cmath>
 
@@ -199,6 +200,19 @@ std::vector<std::shared_ptr<ActorUpdate> > GameLogic::getUpdates(int systemID)
 		deleteActorUpdate->actorID = -1;
 		deleteActorUpdate->updates.push_back(deleteUpdate);
 		result.push_back(deleteActorUpdate);
+	}
+	for (int i = 0; i < result.size() ; i++)
+	{
+		for (int j = 0; j < result[i]->updates.size(); j++)
+		{
+			std::string approveName = result[i]->updates[j]->name;
+			if (approveName == "variant")
+			{
+				VariantUpdate& variantUpdate = (VariantUpdate&) *result[i]->updates[j];
+				approveName = variantUpdate.get<std::string>("name");
+			}
+			approve(result[i]->updates[j]->actorID, approveName, systemCount, result[i]->updates[j]->number);
+		}
 	}
 	return result;
 }

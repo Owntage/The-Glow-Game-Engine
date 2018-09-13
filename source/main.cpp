@@ -9,6 +9,8 @@
 #include "game_logic.h"
 #include "render_system.h"
 #include "gui.h"
+#include "level_loader.h"
+#include "components/coord_event.h"
 
 using namespace std;
 
@@ -38,13 +40,26 @@ int main(int argc, char *argv[])
 
 	ActorFactory actorFactory("res/properties.xml");
 	GameLogic gameLogic(actorFactory);
+	LevelLoader levelLoader(gameLogic);
+	levelLoader.loadLevel("res", "level1.tmx");
+
+	Event timer("timer");
+	gameLogic.onEvent(timer);
+	gameLogic.onEvent(timer);
+	gameLogic.onEvent(timer);
+	gameLogic.onEvent(timer);
+	gameLogic.onEvent(timer);
 
 	int mainActor = gameLogic.createActor("testActor");
+	CoordEvent coordEvent("set_coords", mainActor, 10, 10);
+	gameLogic.onEvent(coordEvent);
+
 	gameLogic.createActor("cyan_light");
 
 	RenderSystem renderSystem(console, guiManager, screen.width, screen.height);
 	renderSystem.setMainActor(mainActor);
 
+	int systemIndex = gameLogic.registerSystem();
 
 	while (window.isOpen())
 	{
@@ -61,6 +76,7 @@ int main(int argc, char *argv[])
 					if (event.key.code == sf::Keyboard::Escape)
 					{
 						window.close();
+						return 0;
 					}
 					break;
 				case sf::Event::Resized:
@@ -69,7 +85,9 @@ int main(int argc, char *argv[])
 			}
 		}
 
-		renderSystem.onUpdate(gameLogic.getUpdates(0));
+		Event timer("timer");
+		//gameLogic.onEvent(timer);
+		renderSystem.onUpdate(gameLogic.getUpdates(systemIndex));
 
 		window.clear(background);
 		renderSystem.draw(window);

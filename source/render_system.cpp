@@ -5,8 +5,11 @@
 
 bool isFileExists(std::string filename)
 {
+	/*
 	std::ifstream file(filename.c_str());
 	return file.good();
+	 */
+	return true; //in the singleplayer each file should exist
 }
 
 DrawableActor::DrawableActor(Console& console, RenderSystem& renderSystem, SoundManager& soundManager, std::shared_ptr<ILightManager> lightManager) :

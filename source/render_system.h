@@ -109,7 +109,7 @@ private:
 
 };
 
-#define TILE_SIZE 64
+#define TILE_SIZE 32
 #define TILESET_WIDTH 16
 #define TILESET_HEIGHT 16
 
