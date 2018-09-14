@@ -153,7 +153,11 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 					else
 					{
 						//std::cout << "loading default image in tile update" << std::endl;
-						image.loadFromFile(imageName);
+						if (!image.loadFromFile(imageName))
+						{
+							std::exception e;
+							throw e;
+						}
 					}
 
 					int pos = renderSystem.imagesInTileset.size();
@@ -317,7 +321,7 @@ void DrawableActor::draw(sf::RenderTarget& renderTarget)
 		{
 			lightSourceID = lightManager->addLightSource(sf::Vector2f(0, 0),
 				sf::Color(renderData.lightR, renderData.lightG, renderData.lightB),
-				renderData.lightIntensity, 0.3);
+				renderData.lightIntensity, 0.1);
 			hasLightSource = true;
 		}
 		lightManager->setPosition(lightSourceID, sf::Vector2f((positionX + speedX * deltaTime) * TILE_SIZE, (positionY + speedY * deltaTime) * TILE_SIZE));

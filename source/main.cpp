@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 	gameLogic.onEvent(timer);
 
 	int mainActor = gameLogic.createActor("testActor");
-	CoordEvent coordEvent("set_coords", mainActor, 10, 10);
+	CoordEvent coordEvent("set_coords", mainActor, 20, 30);
 	gameLogic.onEvent(coordEvent);
 
 	gameLogic.createActor("cyan_light");
