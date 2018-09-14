@@ -93,7 +93,7 @@ private:
 	std::map<std::string, AnimationState> animationStates;
 
 	sf::RectangleShape rect;
-	sf::Vertex vertices[4];
+	sf::Vertex vertices[6];
 	
 	Console& console;
 	int lastMessagePrinted;

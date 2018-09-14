@@ -153,11 +153,7 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 					else
 					{
 						//std::cout << "loading default image in tile update" << std::endl;
-						if (!image.loadFromFile(imageName))
-						{
-							std::exception e;
-							throw e;
-						}
+						image.loadFromFile(imageName);
 					}
 
 					int pos = renderSystem.imagesInTileset.size();
@@ -179,14 +175,20 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 				vertices[0].position = sf::Vector2f(x - 0.5f, y - 0.5f);
 				vertices[1].position = sf::Vector2f(x + 0.5f, y - 0.5f);
 				vertices[2].position = sf::Vector2f(x + 0.5f, y + 0.5f);
-				vertices[3].position = sf::Vector2f(x - 0.5f, y + 0.5f);
+
+				vertices[3].position = sf::Vector2f(x - 0.5f, y - 0.5f);
+				vertices[4].position = sf::Vector2f(x + 0.5f, y + 0.5f);
+				vertices[5].position = sf::Vector2f(x - 0.5f, y + 0.5f);
 
 				vertices[0].texCoords = sf::Vector2f(tileset_x, tileset_y);
 				vertices[1].texCoords = sf::Vector2f(tileset_x + TILE_SIZE, tileset_y);
 				vertices[2].texCoords = sf::Vector2f(tileset_x + TILE_SIZE, tileset_y + TILE_SIZE);
-				vertices[3].texCoords = sf::Vector2f(tileset_x, tileset_y + TILE_SIZE);
 
-				for(int i = 0; i < 4; i++)
+				vertices[3].texCoords = sf::Vector2f(tileset_x, tileset_y);
+				vertices[4].texCoords = sf::Vector2f(tileset_x + TILE_SIZE, tileset_y + TILE_SIZE);
+				vertices[5].texCoords = sf::Vector2f(tileset_x, tileset_y + TILE_SIZE);
+
+				for(int i = 0; i < 6; i++)
 				{
 					renderSystem.tileVertices.append(vertices[i]);
 				}
@@ -337,13 +339,15 @@ void DrawableActor::draw(sf::RenderTarget& renderTarget)
 	
 }
 
+
 RenderSystem::RenderSystem(Console& console, GuiManager& guiManager, float screenWidth, float screenHeight) : 
 	gameView(sf::Vector2f(0.0f, 0.0f), sf::Vector2f(screenWidth / TILE_SIZE, screenHeight / TILE_SIZE)), 
 	mainActor(-1), console(console), 
 	gameGuiManager(screenWidth, screenHeight, guiManager)
 {
+
 	tileset.create(TILESET_WIDTH * TILE_SIZE, TILESET_HEIGHT * TILE_SIZE);
-	tileVertices.setPrimitiveType(sf::PrimitiveType::Quads);
+	tileVertices.setPrimitiveType(sf::PrimitiveType::Triangles);
 	//lightManager = std::make_shared<LightManager>(screenWidth, screenHeight, TILE_SIZE);
 	lightManager = std::shared_ptr<ILightManager>(LightManagerFactory::createLightManager(screenWidth, screenHeight, TILE_SIZE));
 
