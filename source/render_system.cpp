@@ -341,7 +341,7 @@ void DrawableActor::draw(sf::RenderTarget& renderTarget)
 
 
 RenderSystem::RenderSystem(Console& console, GuiManager& guiManager, float screenWidth, float screenHeight) : 
-	gameView(sf::Vector2f(0.0f, 0.0f), sf::Vector2f(screenWidth / TILE_SIZE, screenHeight / TILE_SIZE)), 
+	gameView(sf::Vector2f(0.0f, 0.0f), sf::Vector2f(screenWidth / TILE_SIZE / 2, screenHeight / TILE_SIZE / 2)),
 	mainActor(-1), console(console), 
 	gameGuiManager(screenWidth, screenHeight, guiManager)
 {
@@ -416,8 +416,8 @@ void RenderSystem::onUpdate(std::vector<std::shared_ptr<ActorUpdate> > updates)
 
 void RenderSystem::draw(sf::RenderTarget& renderTarget)
 {
-	float windowSizeX = (float) renderTarget.getSize().x / TILE_SIZE;
-	float windowSizeY = (float) renderTarget.getSize().y / TILE_SIZE;
+	float windowSizeX = (float) renderTarget.getSize().x / TILE_SIZE / 2;
+	float windowSizeY = (float) renderTarget.getSize().y / TILE_SIZE / 2;
 
 	gameView.setSize(windowSizeX, windowSizeY);
 

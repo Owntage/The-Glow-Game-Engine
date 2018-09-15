@@ -106,7 +106,7 @@ void SimpleLightManagerImpl::draw(sf::RenderTarget& renderTarget)
 
 	renderTexture.setView(renderTarget.getView());
 	additiveRenderTexture.setView(renderTarget.getView());
-	renderTexture.clear(sf::Color::Black);
+	renderTexture.clear(sf::Color(32, 32, 64));
 	additiveRenderTexture.clear(sf::Color::Black);
 
 	sf::RenderStates renderStates;

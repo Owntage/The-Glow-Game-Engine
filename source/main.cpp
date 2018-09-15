@@ -11,26 +11,19 @@
 #include "gui.h"
 #include "level_loader.h"
 #include "components/coord_event.h"
+#include "components/move_event.h"
+#include "components/world.h"
 
 using namespace std;
 
-void testBox2d()
-{
-	b2Vec2 gravity(0.0f, -10.0f);
-	b2World world(gravity);
-	b2BodyDef groundBodyDef;
-	groundBodyDef.position.Set(0.0f, -10.0f);
-	b2Body* groundBody = world.CreateBody(&groundBodyDef);
-}
+
 
 int main(int argc, char *argv[])
 {
-	testBox2d();
-
 	sf::VideoMode screen(sf::VideoMode::getDesktopMode());
 	sf::RenderWindow window(screen, "");
-	window.setFramerateLimit(30);
-	sf::View view(sf::Vector2f(0, 0), sf::Vector2f(screen.width / 32, screen.height / 32));
+	window.setFramerateLimit(60);
+	sf::View view(sf::Vector2f(0, 0), sf::Vector2f(screen.width / 64, screen.height / 64));
 	window.setView(view);
 	sf::Color background = sf::Color::Black;
 
@@ -46,9 +39,6 @@ int main(int argc, char *argv[])
 	Event timer("timer");
 	gameLogic.onEvent(timer);
 	gameLogic.onEvent(timer);
-	gameLogic.onEvent(timer);
-	gameLogic.onEvent(timer);
-	gameLogic.onEvent(timer);
 
 	int mainActor = gameLogic.createActor("testActor");
 	CoordEvent coordEvent("set_coords", mainActor, 20, 30);
@@ -58,6 +48,49 @@ int main(int argc, char *argv[])
 
 	RenderSystem renderSystem(console, guiManager, screen.width, screen.height);
 	renderSystem.setMainActor(mainActor);
+
+	NinePatchSprite buttonSprite("res/background.png", true);
+	NinePatchSprite hoveredSprite("res/gui/console/slider.png", true);
+
+	Button upButton(0, -200, 100, 100);
+	upButton.setNormalSprite(buttonSprite);
+	upButton.setHoveredSprite(hoveredSprite);
+	upButton.setPressedSprite(buttonSprite);
+
+	Button downButton(0, 200, 100, 100);
+	downButton.setNormalSprite(buttonSprite);
+	downButton.setHoveredSprite(hoveredSprite);
+	downButton.setPressedSprite(buttonSprite);
+
+	Button leftButton(-200, 0, 100, 100);
+	leftButton.setNormalSprite(buttonSprite);
+	leftButton.setHoveredSprite(hoveredSprite);
+	leftButton.setPressedSprite(buttonSprite);
+
+	Button rightButton(200, 0, 100, 100);
+	rightButton.setNormalSprite(buttonSprite);
+	rightButton.setHoveredSprite(hoveredSprite);
+	rightButton.setPressedSprite(buttonSprite);
+
+	guiManager.addElement(upButton);
+	guiManager.addElement(downButton);
+	guiManager.addElement(leftButton);
+	guiManager.addElement(rightButton);
+
+	bool up = false;
+	bool down = false;
+	bool left = false;
+	bool right = false;
+
+	upButton.setOnPressCallback([&up](){ up = true; });
+	downButton.setOnPressCallback([&down](){ down = true; });
+	leftButton.setOnPressCallback([&left](){ left = true; });
+	rightButton.setOnPressCallback([&right](){ right = true; });
+
+	upButton.setOnReleaseCallback([&up](){ up = false; });
+	downButton.setOnReleaseCallback([&down](){ down = false; });
+	leftButton.setOnReleaseCallback([&left](){ left = false; });
+	rightButton.setOnReleaseCallback([&right](){ right = false; });
 
 	int systemIndex = gameLogic.registerSystem();
 
@@ -85,9 +118,13 @@ int main(int argc, char *argv[])
 			}
 		}
 
-		Event timer("timer");
-		//gameLogic.onEvent(timer);
+		gameLogic.onEvent(timer);
 		renderSystem.onUpdate(gameLogic.getUpdates(systemIndex));
+
+		World::getInstance()->update(60);
+
+		MoveEvent moveEvent(left, right, up, down, 0, mainActor);
+		gameLogic.onEvent(moveEvent);
 
 		window.clear(background);
 		renderSystem.draw(window);
