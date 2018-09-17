@@ -13,6 +13,7 @@
 #include "components/coord_event.h"
 #include "components/move_event.h"
 #include "components/world.h"
+#include "performance_profiler.h"
 
 using namespace std;
 
@@ -94,6 +95,8 @@ int main(int argc, char *argv[])
 
 	int systemIndex = gameLogic.registerSystem();
 
+	PerformanceProfiler performance;
+
 	while (window.isOpen())
 	{
 		sf::Event event;
@@ -111,6 +114,10 @@ int main(int argc, char *argv[])
 						window.close();
 						return 0;
 					}
+					if (event.key.code == sf::Keyboard::Delete)
+					{
+						std::cout << "render: " << performance.getSectionRelativeTime("render") << std::endl;
+					}
 					break;
 				case sf::Event::Resized:
 					//todo: somehow handle window resize
@@ -118,18 +125,21 @@ int main(int argc, char *argv[])
 			}
 		}
 
+		performance.enterSection("logic");
 		gameLogic.onEvent(timer);
-		renderSystem.onUpdate(gameLogic.getUpdates(systemIndex));
-
 		World::getInstance()->update(60);
 
 		MoveEvent moveEvent(left, right, up, down, 0, mainActor);
 		gameLogic.onEvent(moveEvent);
+		performance.exitSection("logic");
 
+		performance.enterSection("render");
+		renderSystem.onUpdate(gameLogic.getUpdates(systemIndex));
 		window.clear(background);
 		renderSystem.draw(window);
 		guiManager.draw(window);
 		window.display();
+		performance.exitSection("render");
 
 	}
 }
