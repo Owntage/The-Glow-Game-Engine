@@ -424,7 +424,25 @@ void RenderSystem::draw(sf::RenderTarget& renderTarget)
 	renderTarget.setView(gameView);
 
 	//sf::RenderStates renderStates(&tileset);
-	renderTarget.draw(tileVertices, &tileset);
+	sf::VertexArray currentTiles;
+	currentTiles.setPrimitiveType(sf::Triangles);
+	sf::Vector2f size = gameView.getSize();
+	sf::Vector2f center = gameView.getCenter();
+	for (int i = 0; i < tileVertices.getVertexCount(); i += 6)
+	{
+		sf::Vector2f pos = tileVertices[i].position;
+		pos -= center;
+		if (pos.x > -size.x / 2 - 1 && pos.x < size.x / 2 && pos.y > -size.y / 2 - 1 && pos.y < size.y / 2)
+		{
+			currentTiles.append(tileVertices[i]);
+			currentTiles.append(tileVertices[i + 1]);
+			currentTiles.append(tileVertices[i + 2]);
+			currentTiles.append(tileVertices[i + 3]);
+			currentTiles.append(tileVertices[i + 4]);
+			currentTiles.append(tileVertices[i + 5]);
+		}
+	}
+	renderTarget.draw(currentTiles, &tileset);
 
 	for(auto it = actors.begin(); it != actors.end(); it++)
 	{
