@@ -340,10 +340,11 @@ void DrawableActor::draw(sf::RenderTarget& renderTarget)
 }
 
 
-RenderSystem::RenderSystem(Console& console, GuiManager& guiManager, float screenWidth, float screenHeight) : 
+RenderSystem::RenderSystem(PerformanceProfiler& performance, Console& console, GuiManager& guiManager, float screenWidth, float screenHeight) :
 	gameView(sf::Vector2f(0.0f, 0.0f), sf::Vector2f(screenWidth / TILE_SIZE / 2, screenHeight / TILE_SIZE / 2)),
 	mainActor(-1), console(console), 
-	gameGuiManager(screenWidth, screenHeight, guiManager)
+	gameGuiManager(screenWidth, screenHeight, guiManager),
+	performanceProfiler(performance)
 {
 
 	tileset.create(TILESET_WIDTH * TILE_SIZE, TILESET_HEIGHT * TILE_SIZE);
@@ -428,6 +429,7 @@ void RenderSystem::draw(sf::RenderTarget& renderTarget)
 	currentTiles.setPrimitiveType(sf::Triangles);
 	sf::Vector2f size = gameView.getSize();
 	sf::Vector2f center = gameView.getCenter();
+	performanceProfiler.enterSection("tiles_prepare");
 	for (int i = 0; i < tileVertices.getVertexCount(); i += 6)
 	{
 		sf::Vector2f pos = tileVertices[i].position;
@@ -442,18 +444,27 @@ void RenderSystem::draw(sf::RenderTarget& renderTarget)
 			currentTiles.append(tileVertices[i + 5]);
 		}
 	}
+	performanceProfiler.exitSection("tiles_prepare");
+	performanceProfiler.enterSection("tiles");
 	renderTarget.draw(currentTiles, &tileset);
+	performanceProfiler.exitSection("tiles");
 
+	performanceProfiler.enterSection("actors");
 	for(auto it = actors.begin(); it != actors.end(); it++)
 	{
 		it->second->draw(renderTarget);
 	}
+	performanceProfiler.exitSection("actors");
 
+	performanceProfiler.enterSection("light");
 	lightManager->draw(renderTarget);
+	performanceProfiler.exitSection("light");
 	gameView.setCenter(newGameViewPos);
 
 	gameGuiManager.onTimer();
+	performanceProfiler.enterSection("game_gui");
 	gameGuiManager.draw(renderTarget);
+	performanceProfiler.exitSection("game_gui");
 
 }
 

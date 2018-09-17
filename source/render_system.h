@@ -17,6 +17,7 @@
 #include "components/deathmatch_component.h"
 #include "components/variant_update.h"
 #include "sound_manager.h"
+#include "performance_profiler.h"
 
 
 #define MULTIPLY_FRAGMENT_SHADER "res/divide_fragment_shader.txt"
@@ -117,7 +118,7 @@ private:
 
 struct RenderSystem
 {
-	RenderSystem(Console& console, GuiManager& guiManager, float screenWidth, float screenHeight);
+	RenderSystem(PerformanceProfiler& performance, Console& console, GuiManager& guiManager, float screenWidth, float screenHeight);
 	void onUpdate(std::vector<std::shared_ptr<ActorUpdate> > updates);
 	void draw(sf::RenderTarget& renderTarget);
 	void setMainActor(int mainActor);
@@ -144,6 +145,7 @@ private:
 	sf::VertexArray tileVertices;
 	sf::Texture tileset;
 	Console& console;
+	PerformanceProfiler& performanceProfiler;
 	SoundManager soundManager;
 	std::shared_ptr<ILightManager> lightManager;
 	GameGuiManager gameGuiManager;

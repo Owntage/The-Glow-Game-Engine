@@ -47,7 +47,8 @@ int main(int argc, char *argv[])
 
 	gameLogic.createActor("cyan_light");
 
-	RenderSystem renderSystem(console, guiManager, screen.width, screen.height);
+	PerformanceProfiler performance;
+	RenderSystem renderSystem(performance, console, guiManager, screen.width, screen.height);
 	renderSystem.setMainActor(mainActor);
 
 	NinePatchSprite buttonSprite("res/background.png", true);
@@ -95,8 +96,6 @@ int main(int argc, char *argv[])
 
 	int systemIndex = gameLogic.registerSystem();
 
-	PerformanceProfiler performance;
-
 	while (window.isOpen())
 	{
 		sf::Event event;
@@ -117,6 +116,11 @@ int main(int argc, char *argv[])
 					if (event.key.code == sf::Keyboard::Delete)
 					{
 						std::cout << "render: " << performance.getSectionRelativeTime("render") << std::endl;
+						std::cout << "tiles: " << performance.getSectionRelativeTime("tiles") << std::endl;
+						std::cout << "game ui: " << performance.getSectionRelativeTime("game_gui") << std::endl;
+						std::cout << "light: " << performance.getSectionRelativeTime("light") << std::endl;
+						std::cout << "tiles preparation: " << performance.getSectionRelativeTime("tiles_prepare") << std::endl;
+						std::cout << "actors: " << performance.getSectionRelativeTime("actors") << std::endl;
 					}
 					break;
 				case sf::Event::Resized:
@@ -131,15 +135,18 @@ int main(int argc, char *argv[])
 
 		MoveEvent moveEvent(left, right, up, down, 0, mainActor);
 		gameLogic.onEvent(moveEvent);
+
+		renderSystem.onUpdate(gameLogic.getUpdates(systemIndex));
 		performance.exitSection("logic");
 
-		performance.enterSection("render");
-		renderSystem.onUpdate(gameLogic.getUpdates(systemIndex));
+
 		window.clear(background);
+		performance.enterSection("render");
 		renderSystem.draw(window);
 		guiManager.draw(window);
-		window.display();
 		performance.exitSection("render");
+		window.display();
+
 
 	}
 }

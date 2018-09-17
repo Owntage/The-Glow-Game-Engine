@@ -17,13 +17,15 @@ private:
 	std::unordered_map<std::string, int64_t> timeStorage;
 	std::unordered_map<std::string, std::chrono::system_clock::time_point> lastTimeEntered;
 	int64_t summaryTime;
+	int enterCounter;
 };
 
-PerformanceProfilerImpl::PerformanceProfilerImpl() : summaryTime(0)
+PerformanceProfilerImpl::PerformanceProfilerImpl() : summaryTime(0), enterCounter(0)
 {}
 
 void PerformanceProfilerImpl::enterSection(const std::string& name)
 {
+	enterCounter++;
 	lastTimeEntered[name] = std::chrono::system_clock::now();
 }
 
@@ -36,7 +38,11 @@ void PerformanceProfilerImpl::exitSection(const std::string& name)
 	auto currentTime = std::chrono::system_clock::now();
 	auto enterTime = lastTimeEntered[name];
 	int64_t microsecondsSpent = std::chrono::duration_cast<std::chrono::microseconds>(currentTime - enterTime).count();
-	summaryTime += microsecondsSpent;
+	enterCounter--;
+	if (enterCounter == 0)
+	{
+		summaryTime += microsecondsSpent;
+	}
 	if (timeStorage.find(name) == timeStorage.end())
 	{
 		timeStorage[name] = 0;
