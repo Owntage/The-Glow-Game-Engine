@@ -463,7 +463,7 @@ void RenderSystem::draw(sf::RenderTarget& renderTarget)
 
 	gameGuiManager.onTimer();
 	performanceProfiler.enterSection("game_gui");
-	gameGuiManager.draw(renderTarget);
+	//gameGuiManager.draw(renderTarget);
 	performanceProfiler.exitSection("game_gui");
 
 }

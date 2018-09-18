@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
 {
 	sf::VideoMode screen(sf::VideoMode::getDesktopMode());
 	sf::RenderWindow window(screen, "");
-	window.setFramerateLimit(60);
+	window.setFramerateLimit(30);
 	sf::View view(sf::Vector2f(0, 0), sf::Vector2f(screen.width / 64, screen.height / 64));
 	window.setView(view);
 	sf::Color background = sf::Color::Black;

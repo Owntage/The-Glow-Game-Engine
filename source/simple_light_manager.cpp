@@ -2,6 +2,7 @@
 
 #include "math.h"
 #include <unordered_map>
+#include <iostream>
 
 using namespace std;
 
@@ -37,7 +38,6 @@ private:
 	const unsigned int BUBBLE_TEXTURE_SIZE = 100;
 	sf::Texture bubbleTexture;
 	sf::RenderTexture renderTexture;
-	sf::RenderTexture additiveRenderTexture;
 	unordered_map<int, LightData> lights;
 	int lightCounter;
 	float tileSize;
@@ -82,12 +82,12 @@ void SimpleLightManagerImpl::init(float screenWidth, float screenHeight, float t
 	bubbleTexture.setSmooth(true);
 	bubbleTexture.generateMipmap();
 
-	renderTexture.create(screenWidth, screenHeight);
-	additiveRenderTexture.create(screenWidth, screenHeight);
+	renderTexture.create(screenWidth / 8, screenHeight / 8);
 }
 
 int SimpleLightManagerImpl::addLightSource(sf::Vector2f pos, sf::Color color, float intensity, float additiveFactor)
 {
+	std::cout << "light added: " << lightCounter << std::endl;
 	LightData lightData(intensity, color, pos, additiveFactor);
 	lights[lightCounter] = lightData; //todo: make additive part configurable
 	return lightCounter++;
@@ -105,42 +105,61 @@ void SimpleLightManagerImpl::draw(sf::RenderTarget& renderTarget)
 	rect.setTexture(&bubbleTexture);
 
 	renderTexture.setView(renderTarget.getView());
-	additiveRenderTexture.setView(renderTarget.getView());
 	renderTexture.clear(sf::Color(32, 32, 64));
-	additiveRenderTexture.clear(sf::Color::Black);
 
 	sf::RenderStates renderStates;
 	renderStates.blendMode = sf::BlendAdd;
+	renderStates.texture = &bubbleTexture;
 
+	sf::VertexArray lightsArray;
+	sf::VertexArray additiveLightsArray;
+	lightsArray.setPrimitiveType(sf::Triangles);
+	additiveLightsArray.setPrimitiveType(sf::Triangles);
 	for (auto iter = lights.begin(); iter != lights.end(); iter++)
 	{
 		LightData data = iter->second;
-		rect.setSize(sf::Vector2f(data.radius, data.radius));
-		rect.setOrigin(data.radius / 2, data.radius / 2);
-		rect.setPosition(data.pos / tileSize);
-		rect.setFillColor(data.color);
-		renderTexture.draw(rect, renderStates);
-		//now dealing with additive part
+		lightsArray.append(sf::Vertex(data.pos / tileSize + sf::Vector2f(-data.radius / 2, -data.radius / 2),
+									  data.color, sf::Vector2f(0, 0)));
+		lightsArray.append(sf::Vertex(data.pos / tileSize + sf::Vector2f(data.radius / 2, -data.radius / 2),
+									  data.color, sf::Vector2f(100, 0)));
+		lightsArray.append(sf::Vertex(data.pos / tileSize + sf::Vector2f(data.radius / 2, data.radius / 2),
+									  data.color, sf::Vector2f(100, 100)));
+		lightsArray.append(sf::Vertex(data.pos / tileSize + sf::Vector2f(-data.radius / 2, -data.radius / 2),
+									  data.color, sf::Vector2f(0, 0)));
+		lightsArray.append(sf::Vertex(data.pos / tileSize + sf::Vector2f(data.radius / 2, data.radius / 2),
+									  data.color, sf::Vector2f(100, 100)));
+		lightsArray.append(sf::Vertex(data.pos / tileSize + sf::Vector2f(-data.radius / 2, data.radius / 2),
+									  data.color, sf::Vector2f(0, 100)));
+
 		float r = data.color.r;
 		float g = data.color.g;
 		float b = data.color.b;
 		r *= data.additivePart;
 		g *= data.additivePart;
 		b *= data.additivePart;
-		rect.setFillColor(sf::Color(r, g, b));
-		additiveRenderTexture.draw(rect, renderStates);
 
+		data.color = sf::Color(r, g, b);
+
+		additiveLightsArray.append(sf::Vertex(data.pos / tileSize + sf::Vector2f(-data.radius / 2, -data.radius / 2),
+									  data.color, sf::Vector2f(0, 0)));
+		additiveLightsArray.append(sf::Vertex(data.pos / tileSize + sf::Vector2f(data.radius / 2, -data.radius / 2),
+									  data.color, sf::Vector2f(100, 0)));
+		additiveLightsArray.append(sf::Vertex(data.pos / tileSize + sf::Vector2f(data.radius / 2, data.radius / 2),
+									  data.color, sf::Vector2f(100, 100)));
+		additiveLightsArray.append(sf::Vertex(data.pos / tileSize + sf::Vector2f(-data.radius / 2, -data.radius / 2),
+									  data.color, sf::Vector2f(0, 0)));
+		additiveLightsArray.append(sf::Vertex(data.pos / tileSize + sf::Vector2f(data.radius / 2, data.radius / 2),
+									  data.color, sf::Vector2f(100, 100)));
+		additiveLightsArray.append(sf::Vertex(data.pos / tileSize + sf::Vector2f(-data.radius / 2, data.radius / 2),
+									  data.color, sf::Vector2f(0, 100)));
 	}
+	renderTexture.draw(lightsArray, renderStates);
+	renderTarget.draw(additiveLightsArray, renderStates);
 	renderTexture.display();
-	additiveRenderTexture.display();
 	sf::RectangleShape resultRect;
 	resultRect.setOrigin(renderTarget.getView().getSize() / 2.0f);
 	resultRect.setSize(renderTarget.getView().getSize());
 	resultRect.setPosition(renderTarget.getView().getCenter());
-
-	renderStates.blendMode = sf::BlendAdd;
-	resultRect.setTexture(&additiveRenderTexture.getTexture());
-	renderTarget.draw(resultRect, renderStates);
 
 	renderStates.blendMode = sf::BlendMultiply;
 	resultRect.setTexture(&renderTexture.getTexture());
