@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
 {
 	sf::VideoMode screen(sf::VideoMode::getDesktopMode());
 	sf::RenderWindow window(screen, "");
-	window.setFramerateLimit(30);
+	//window.setFramerateLimit(30);
 	sf::View view(sf::Vector2f(0, 0), sf::Vector2f(screen.width / 64, screen.height / 64));
 	window.setView(view);
 	sf::Color background = sf::Color::Black;
@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 	ActorFactory actorFactory("res/properties.xml");
 	GameLogic gameLogic(actorFactory);
 	LevelLoader levelLoader(gameLogic);
-	levelLoader.loadLevel("res", "level1.tmx");
+	levelLoader.loadLevel("res", "demo.tmx");
 
 	Event timer("timer");
 	gameLogic.onEvent(timer);
@@ -131,6 +131,8 @@ int main(int argc, char *argv[])
 
 		performance.enterSection("logic");
 		gameLogic.onEvent(timer);
+		gameLogic.onEvent(timer);
+		World::getInstance()->update(60);
 		World::getInstance()->update(60);
 
 		MoveEvent moveEvent(left, right, up, down, 0, mainActor);

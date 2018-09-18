@@ -114,8 +114,8 @@
 		<render>
 			<light_is_visible>true</light_is_visible>
 			<sprite_is_visible>false</sprite_is_visible>
-			<light_intensity>10</light_intensity>
-			<light_r>0</light_r>
+			<light_intensity>20</light_intensity>
+			<light_r>32</light_r>
 			<light_g>255</light_g>
 			<light_b>255</light_b>
 		</render>
@@ -126,10 +126,10 @@
 			<light_is_visible>true</light_is_visible>
 			<sprite_is_visible>true</sprite_is_visible>
 			<sprite_scale>1</sprite_scale>
-			<light_intensity>10</light_intensity>
+			<light_intensity>20</light_intensity>
 			<light_r>255</light_r>
-			<light_g>0</light_g>
-			<light_b>0</light_b>
+			<light_g>32</light_g>
+			<light_b>32</light_b>
 		</render>
 		<move>.</move>
 	</red_light>
